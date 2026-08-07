@@ -161,15 +161,14 @@
   <!-- SCRIPT INTEGRASI REALTIME -->
   <!-- SCRIPT INTEGRASI TANPA KENDALA CORS (FAILED TO FETCH) -->
   <script>
-    const API_URL = "https://script.google.com/macros/s/AKfycbxMg-ESLCFyaqPWucit-u9wNEvpYovJr8t6nKBkHW7MAUEiBh00fzPpw-x6cK8QaCag/exec";
-
+    const API_URL = "https://script.google.com/macros/s/AKfycbyCqv5m7HJEb4S9X3mtZOc57LJt8TVHToMt5MRboHfarvAvwxKOYKrb6NBOXVUdYNIb/exec";
     let rawRoomsData = [];
 
     document.addEventListener("DOMContentLoaded", function() {
       loadData();
     });
 
-    // Fetch Data menggunakan redirect follow agar tidak diblokir CORS
+    // LOAD DATA MENGGUNAKAN JSONP (TIDAK AKAN DIBLOKIR BROWSER / CORS)
     function loadData() {
       const tbody = document.getElementById("roomTableBody");
       tbody.innerHTML = `
@@ -180,22 +179,30 @@
           </td>
         </tr>`;
 
-      fetch(`${API_URL}?action=getRooms`, {
-        method: "GET",
-        redirect: "follow"
-      })
-      .then(res => res.json())
-      .then(result => {
-        if(result.status === "success") {
-          rawRoomsData = result.data;
-          renderTable(rawRoomsData);
-        } else {
-          tbody.innerHTML = `<tr><td colspan="10" class="text-center py-4 text-red-500">Gagal memuat data: ${result.message}</td></tr>`;
-        }
-      })
-      .catch(err => {
-        tbody.innerHTML = `<tr><td colspan="10" class="text-center py-4 text-red-500">Error koneksi: ${err.message}. Pastikan Web App Apps Script disetel ke "Anyone" (Siapa Saja).</td></tr>`;
-      });
+      // Hapus script JSONP lama jika ada
+      const oldScript = document.getElementById("jsonpScript");
+      if (oldScript) oldScript.remove();
+
+      // Buat script tag baru secara dinamis
+      const script = document.createElement("script");
+      script.id = "jsonpScript";
+      script.src = `${API_URL}?action=getRooms&callback=handleJsonResponse`;
+      
+      script.onerror = function() {
+        tbody.innerHTML = `<tr><td colspan="10" class="text-center py-4 text-red-500">Gagal terhubung. Pastikan Web App Apps Script sudah di-Deploy versi terbaru!</td></tr>`;
+      };
+
+      document.body.appendChild(script);
+    }
+
+    // Fungsi Callback penampung data dari Apps Script
+    function handleJsonResponse(result) {
+      if(result.status === "success") {
+        rawRoomsData = result.data;
+        renderTable(rawRoomsData);
+      } else {
+        document.getElementById("roomTableBody").innerHTML = `<tr><td colspan="10" class="text-center py-4 text-red-500">Gagal: ${result.message}</td></tr>`;
+      }
     }
 
     // Render Data ke Tabel
@@ -236,7 +243,6 @@
       document.getElementById("addRoomBtn").classList.remove("hidden");
     }
 
-    // Filter Pencarian
     function filterRooms() {
       const query = document.getElementById("searchInput").value.toLowerCase();
       const filtered = rawRoomsData.filter(r => 
@@ -245,86 +251,6 @@
         r.program.toLowerCase().includes(query)
       );
       renderTable(filtered);
-    }
-
-    // Modal Handlers
-    function openAddRoomModal() {
-      document.getElementById("modalTitle").innerText = "Tambah Ruangan Baru";
-      document.getElementById("modalRowIndex").value = "";
-      document.getElementById("roomForm").reset();
-      document.getElementById("roomModal").classList.remove("hidden");
-      document.getElementById("roomModal").classList.add("flex");
-    }
-
-    function openEditRoomModal(room) {
-      document.getElementById("modalTitle").innerText = `Edit Ruangan (${room.code})`;
-      document.getElementById("modalRowIndex").value = room.rowIndex;
-      document.getElementById("modalCode").value = room.code;
-      document.getElementById("modalLantai").value = room.lantai;
-      document.getElementById("modalProgram").value = room.program;
-      document.getElementById("modalWaktu").value = room.waktuLayanan;
-      document.getElementById("modalKursi").value = room.kursi;
-      document.getElementById("modalTv").value = room.tvSmart;
-      document.getElementById("modalAc").value = room.ac;
-      document.getElementById("modalStopKontak").value = room.stopKontak;
-      document.getElementById("modalPapanTulis").value = room.papanTulis;
-      document.getElementById("modalPetugas").value = room.petugas !== "-" ? room.petugas : "";
-
-      document.getElementById("roomModal").classList.remove("hidden");
-      document.getElementById("roomModal").classList.add("flex");
-    }
-
-    function closeModal() {
-      document.getElementById("roomModal").classList.add("hidden");
-      document.getElementById("roomModal").classList.remove("flex");
-    }
-
-    // Simpan data via POST
-    function handleSaveRoom(e) {
-      e.preventDefault();
-      const saveBtn = document.getElementById("saveBtn");
-      saveBtn.disabled = true;
-      saveBtn.innerHTML = `<i class="fas fa-circle-notch fa-spin"></i> Menyimpan...`;
-
-      const rowIndex = document.getElementById("modalRowIndex").value;
-      const isEdit = rowIndex !== "";
-
-      const payload = {
-        action: isEdit ? "updateRoom" : "addRoom",
-        rowIndex: rowIndex,
-        code: document.getElementById("modalCode").value,
-        lantai: document.getElementById("modalLantai").value,
-        program: document.getElementById("modalProgram").value,
-        waktuLayanan: document.getElementById("modalWaktu").value,
-        kursi: document.getElementById("modalKursi").value,
-        tvSmart: document.getElementById("modalTv").value,
-        ac: document.getElementById("modalAc").value,
-        stopKontak: document.getElementById("modalStopKontak").value,
-        papanTulis: document.getElementById("modalPapanTulis").value,
-        petugas: document.getElementById("modalPetugas").value
-      };
-
-      fetch(API_URL, {
-        method: "POST",
-        body: JSON.stringify(payload),
-        headers: { "Content-Type": "text/plain;charset=utf-8" },
-        redirect: "follow"
-      })
-      .then(res => res.json())
-      .then(res => {
-        if(res.status === "success") {
-          alert(res.message || "Data berhasil disimpan!");
-          closeModal();
-          loadData();
-        } else {
-          alert("Gagal menyimpan: " + res.message);
-        }
-      })
-      .catch(err => alert("Terjadi kesalahan: " + err.message))
-      .finally(() => {
-        saveBtn.disabled = false;
-        saveBtn.innerHTML = `<i class="fas fa-save"></i> Simpan`;
-      });
     }
   </script>
 </body>
