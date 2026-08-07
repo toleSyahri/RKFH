@@ -3,1081 +3,494 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SIM-RUANG FH UNESA</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+  <title>SIM RUANG FH - Sistem Informasi Manajemen Ruangan</title>
+  <!-- Bootstrap 5 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- FontAwesome Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-    body { font-family: 'Inter', sans-serif; }
+    body { background-color: #f4f6f9; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    .auth-card { max-width: 450px; margin: 50px auto; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
+    .hidden { display: none !important; }
+    .navbar-brand { font-weight: bold; letter-spacing: 1px; }
   </style>
 </head>
-<body class="bg-slate-100 text-slate-800 min-h-screen flex flex-col">
+<body>
 
   <!-- NAVBAR -->
-  <nav id="topNavbar" class="bg-blue-900 text-white shadow-lg sticky top-0 z-50 transition-colors">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="flex items-center justify-between h-16">
-        <div class="flex items-center gap-3 cursor-pointer" onclick="switchUserTab('rooms')">
-          <div class="bg-white p-2 rounded-lg text-blue-900 font-bold text-xl leading-none">FH</div>
-          <div>
-            <h1 class="font-bold text-lg leading-tight flex items-center gap-2">
-              SIM-RUANG FH UNESA
-              <span id="adminBadge" class="hidden bg-amber-500 text-slate-900 text-xs font-black px-2 py-0.5 rounded uppercase">DASHBOARD ADMIN</span>
-            </h1>
-            <p class="text-xs text-blue-200">Sistem Informasi Pengelolaan & Peminjaman Ruangan</p>
-          </div>
-        </div>
-        
-        <div class="flex items-center gap-3">
-          <!-- Auth Section -->
-          <div id="authUserSection">
-            <button onclick="openAuthModal('login')" class="bg-blue-800 hover:bg-blue-700 text-white text-xs px-3 py-2 rounded-lg transition font-medium">
-              <i class="fas fa-sign-in-alt mr-1"></i> Login / Daftar
-            </button>
-          </div>
-
-          <!-- Admin Mode Toggle -->
-          <button id="adminToggleBtn" onclick="toggleAdminMode()" class="bg-amber-600 hover:bg-amber-500 text-white text-xs px-3.5 py-2 rounded-lg transition flex items-center gap-1.5 font-bold shadow-md">
-            <i class="fas fa-user-shield" id="adminIcon"></i> <span id="adminBtnText">Mode Admin</span>
-          </button>
-        </div>
+  <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
+    <div class="container">
+      <a class="navbar-brand" href="#"><i class="fa-solid fa-building-columns me-2"></i>SIM RUANG FH</a>
+      <div class="d-flex align-items-center">
+        <span id="userGreeting" class="text-white me-3 hidden"></span>
+        <button id="btnLogout" class="btn btn-outline-light btn-sm hidden" onclick="logout()"><i class="fa-solid fa-right-from-bracket me-1"></i>Keluar</button>
       </div>
     </div>
   </nav>
 
-  <!-- NAVIGATION TABS FOR USERS -->
-  <div id="userNavTabs" class="bg-white border-b border-slate-200 shadow-sm">
-    <div class="max-w-7xl mx-auto px-4 flex gap-6 text-sm font-medium">
-      <button onclick="switchUserTab('rooms')" id="tabRoomsBtn" class="py-3 text-blue-900 border-b-2 border-blue-900 font-bold flex items-center gap-2">
-        <i class="fas fa-door-open"></i> Daftar Ruangan
-      </button>
-      <button onclick="switchUserTab('status')" id="tabStatusBtn" class="py-3 text-slate-500 hover:text-blue-900 flex items-center gap-2">
-        <i class="fas fa-list-check"></i> Cek Status & Jadwal Peminjaman
-      </button>
-    </div>
-  </div>
-
-  <!-- ADMIN DASHBOARD PANEL (MODE ADMIN) -->
-  <div id="adminPanel" class="hidden bg-slate-900 text-white border-b border-slate-800 shadow-xl">
-    <div class="max-w-7xl mx-auto px-4 py-4">
-      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
-        <div>
-          <h2 class="text-xl font-bold text-amber-400 flex items-center gap-2">
-            <i class="fas fa-sliders-h"></i> Panel Kontrol Administrator
-          </h2>
-          <p class="text-xs text-slate-400">Kelola master data ruangan dan kelola persetujuan pengajuan peminjaman</p>
-        </div>
-        <div class="flex flex-wrap gap-2">
-          <!-- ⚡ TOMBOL INSTRUKSI KOMANDAN / VIP -->
-          <button onclick="openVipModal()" class="bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 text-xs px-3.5 py-2 rounded-lg font-black shadow hover:brightness-110 transition flex items-center gap-1.5 border border-amber-300">
-            <i class="fas fa-bolt text-sm"></i> ⚡ Booking Kilat Pimpinan
-          </button>
-          <button onclick="switchAdminTab('manageRooms')" id="adminTabRoomsBtn" class="bg-slate-800 border border-slate-700 text-white text-xs px-3.5 py-2 rounded-lg font-bold shadow hover:bg-slate-700 transition">
-            <i class="fas fa-edit mr-1"></i> Kelola Ruangan
-          </button>
-          <button onclick="switchAdminTab('manageBookings')" id="adminTabBookingsBtn" class="bg-slate-800 border border-slate-700 text-white text-xs px-3.5 py-2 rounded-lg font-bold hover:bg-slate-700 transition">
-            <i class="fas fa-tasks mr-1"></i> Kelola Pengajuan (<span id="adminPendingBadge">0</span>)
-          </button>
-        </div>
-      </div>
-
-      <!-- Admin Stats Cards -->
-      <div class="grid grid-cols-2 md:grid-cols-4 gap-3 text-slate-900 pt-2">
-        <div class="bg-slate-800 text-white p-3 rounded-xl border border-slate-700">
-          <p class="text-xs text-slate-400">Total Ruangan</p>
-          <h3 id="statTotalRooms" class="text-xl font-bold text-amber-400">0</h3>
-        </div>
-        <div class="bg-slate-800 text-white p-3 rounded-xl border border-slate-700">
-          <p class="text-xs text-slate-400">Menunggu Persetujuan</p>
-          <h3 id="statPending" class="text-xl font-bold text-amber-500">0</h3>
-        </div>
-        <div class="bg-slate-800 text-white p-3 rounded-xl border border-slate-700">
-          <p class="text-xs text-slate-400">Disetujui</p>
-          <h3 id="statApproved" class="text-xl font-bold text-emerald-400">0</h3>
-        </div>
-        <div class="bg-slate-800 text-white p-3 rounded-xl border border-slate-700">
-          <p class="text-xs text-slate-400">Ditolak</p>
-          <h3 id="statRejected" class="text-xl font-bold text-rose-400">0</h3>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- MAIN CONTENT -->
-  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-grow w-full">
+  <div class="container my-4">
     
-    <!-- VIEW 1: TABEL DAFTAR RUANGAN -->
-    <div id="viewRooms">
-      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
-        <div>
-          <h2 class="text-2xl font-bold text-slate-900" id="roomTableTitle">Daftar Fasilitas Ruang Perkuliahan</h2>
-          <p class="text-slate-500 text-sm">Pilih ruangan dan klik tombol Pinjam untuk mengajukan peminjaman</p>
-        </div>
-        <div class="flex items-center gap-2">
-          <button id="btnAddRoomAdmin" onclick="openRoomModal()" class="hidden bg-emerald-600 hover:bg-emerald-700 text-white text-xs px-3.5 py-2.5 rounded-lg font-bold transition flex items-center gap-1 shadow-sm">
-            <i class="fas fa-plus-circle"></i> Tambah Ruang Baru
-          </button>
-          <input type="text" id="searchInput" onkeyup="filterRooms()" placeholder="Cari Ruangan / Lantai..." class="px-4 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none w-64 shadow-sm">
-          <button onclick="loadRooms()" class="bg-blue-900 text-white p-2.5 rounded-lg hover:bg-blue-800 transition" title="Reload Data"><i class="fas fa-sync-alt"></i></button>
-        </div>
-      </div>
+    <!-- ALERT NOTIFIKASI -->
+    <div id="alertBox" class="alert alert-dismissible fade show hidden" role="alert">
+      <span id="alertMessage"></span>
+      <button type="button" class="btn-close" onclick="hideAlert()"></button>
+    </div>
 
-      <div class="bg-white rounded-xl shadow-md border border-slate-200 overflow-hidden">
-        <div class="overflow-x-auto">
-          <table class="w-full text-sm text-left text-slate-600">
-            <thead class="bg-slate-100 text-slate-700 uppercase text-xs font-semibold tracking-wider border-b">
-              <tr>
-                <th class="py-3.5 px-4 text-center">Lantai</th>
-                <th class="py-3.5 px-4 text-center">Kode Ruang</th>
-                <th class="py-3.5 px-4 text-center">Kursi</th>
-                <th class="py-3.5 px-4 text-center">TV Smart</th>
-                <th class="py-3.5 px-4 text-center">AC</th>
-                <th class="py-3.5 px-4 text-center">Stop Kontak</th>
-                <th class="py-3.5 px-4 text-center">Papan Tulis</th>
-                <th class="py-3.5 px-4 text-center">Waktu Layanan</th>
-                <th class="py-3.5 px-4 text-center">Program</th>
-                <th class="py-3.5 px-4 text-center">Aksi</th>
-              </tr>
-            </thead>
-            <tbody id="roomTableBody" class="divide-y divide-slate-200">
-              <tr>
-                <td colspan="10" class="text-center py-8 text-slate-400">
-                  <i class="fas fa-circle-notch fa-spin fa-2x text-blue-600 mb-2"></i>
-                  <p>Memuat data ruangan...</p>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+    <!-- ========================================== -->
+    <!-- SECTION 1: FORM LOGIN & REGISTRASI -->
+    <!-- ========================================== -->
+    <div id="authSection">
+      <div class="card auth-card bg-white">
+        <div class="card-body p-4">
+          
+          <!-- TAB NAVIGASI AUTH -->
+          <ul class="nav nav-pills nav-justified mb-3" id="authTab">
+            <li class="nav-item">
+              <button class="nav-link active" onclick="switchAuthTab('login')">Masuk</button>
+            </li>
+            <li class="nav-item">
+              <button class="nav-link" onclick="switchAuthTab('register')">Daftar</button>
+            </li>
+          </ul>
+
+          <!-- FORM LOGIN -->
+          <form id="formLogin" onsubmit="handleLogin(event)">
+            <div class="mb-3">
+              <label class="form-label">Username / NIM / Email</label>
+              <input type="text" id="loginUsername" class="form-control" placeholder="Masukkan ID Akun" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Password</label>
+              <input type="password" id="loginPassword" class="form-control" placeholder="Masukkan Password" required>
+            </div>
+            <button type="submit" id="btnLoginSubmit" class="btn btn-primary w-100">
+              <span id="loginSpinner" class="spinner-border spinner-border-sm me-2 hidden"></span>Masuk
+            </button>
+          </form>
+
+          <!-- FORM REGISTRASI -->
+          <form id="formRegister" class="hidden" onsubmit="handleRegister(event)">
+            <div class="mb-2">
+              <label class="form-label">Nama Lengkap</label>
+              <input type="text" id="regNama" class="form-control" placeholder="Nama Lengkap" required>
+            </div>
+            <div class="mb-2">
+              <label class="form-label">Asal / Prodi</label>
+              <input type="text" id="regProdi" class="form-control" placeholder="Contoh: S1 Ilmu Hukum" required>
+            </div>
+            <div class="mb-2">
+              <label class="form-label">NIP / NIM</label>
+              <input type="text" id="regNim" class="form-control" placeholder="Nomor Induk" required>
+            </div>
+            <div class="mb-2">
+              <label class="form-label">No WhatsApp</label>
+              <input type="text" id="regHp" class="form-control" placeholder="08123456789" required>
+            </div>
+            <div class="mb-2">
+              <label class="form-label">Email</label>
+              <input type="email" id="regEmail" class="form-control" placeholder="email@domain.com" required>
+            </div>
+            <div class="mb-2">
+              <label class="form-label">Username</label>
+              <input type="text" id="regUsername" class="form-control" placeholder="Username untuk login" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Password</label>
+              <input type="password" id="regPassword" class="form-control" placeholder="Password" required>
+            </div>
+            <button type="submit" id="btnRegSubmit" class="btn btn-success w-100">
+              <span id="regSpinner" class="spinner-border spinner-border-sm me-2 hidden"></span>Daftar Akun
+            </button>
+          </form>
+
         </div>
       </div>
     </div>
 
-    <!-- VIEW 2: CEK STATUS & KELOLA PENGAJUAN -->
-    <div id="viewStatus" class="hidden">
-      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
-        <div>
-          <h2 class="text-2xl font-bold text-slate-900">Jadwal & Status Peminjaman Ruang</h2>
-          <p class="text-slate-500 text-sm">Pantau persetujuan peminjaman atau kelola relokasi jadwal</p>
-        </div>
-        <div class="flex items-center gap-2">
-          <input type="text" id="searchStatusInput" onkeyup="filterStatus()" placeholder="Cari NIM / Nama / Ruang..." class="px-4 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none w-64 shadow-sm">
-          <button onclick="loadBookings()" class="bg-blue-900 text-white p-2.5 rounded-lg hover:bg-blue-800 transition"><i class="fas fa-sync-alt"></i></button>
-        </div>
-      </div>
-
-      <div class="bg-white rounded-xl shadow-md border border-slate-200 overflow-hidden">
-        <div class="overflow-x-auto">
-          <table class="w-full text-sm text-left text-slate-600">
-            <thead class="bg-slate-100 text-slate-700 uppercase text-xs font-semibold tracking-wider border-b">
-              <tr>
-                <th class="py-3.5 px-4">Waktu Pengajuan</th>
-                <th class="py-3.5 px-4 text-center">Kode Ruang</th>
-                <th class="py-3.5 px-4">Pemohon</th>
-                <th class="py-3.5 px-4">Tanggal & Jam</th>
-                <th class="py-3.5 px-4">Keperluan</th>
-                <th class="py-3.5 px-4 text-center">Status Peminjaman</th>
-                <th id="thAdminAction" class="py-3.5 px-4 text-center hidden">Aksi Admin & Relokasi</th>
-              </tr>
-            </thead>
-            <tbody id="bookingTableBody" class="divide-y divide-slate-200">
-              <tr>
-                <td colspan="7" class="text-center py-8 text-slate-400">
-                  <i class="fas fa-circle-notch fa-spin fa-2x text-blue-600 mb-2"></i>
-                  <p>Memuat status peminjaman...</p>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-
-  </main>
-
-  <!-- MODAL 1: FORM PEMINJAMAN USER -->
-  <div id="bookingModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
-    <div class="bg-white rounded-xl shadow-2xl max-w-lg w-full overflow-hidden">
-      <div class="bg-blue-900 text-white px-6 py-4 flex items-center justify-between">
-        <div>
-          <h3 class="font-bold text-lg">Form Pengajuan Peminjaman</h3>
-          <p id="bookingRoomTitle" class="text-xs text-blue-200">Ruang: -</p>
-        </div>
-        <button type="button" onclick="closeBookingModal()" class="text-blue-200 hover:text-white"><i class="fas fa-times text-xl"></i></button>
-      </div>
-      <form id="bookingForm" onsubmit="handleSaveBooking(event)" class="p-6 space-y-4">
-        <input type="hidden" id="bookingRoomCode">
-        
-        <div>
-          <label class="block text-xs font-semibold text-slate-600 mb-1">Nama Lengkap Pemohon *</label>
-          <input type="text" id="bookNama" required placeholder="Contoh: Hana Salsabila" class="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
-        </div>
-
-        <div class="grid grid-cols-2 gap-4">
-          <div>
-            <label class="block text-xs font-semibold text-slate-600 mb-1">NIM / NIP *</label>
-            <input type="text" id="bookNim" required placeholder="2104070..." class="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
-          </div>
-          <div>
-            <label class="block text-xs font-semibold text-slate-600 mb-1">No. WhatsApp *</label>
-            <input type="tel" id="bookHp" required placeholder="08123456789" class="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
-          </div>
-        </div>
-
-        <div>
-          <label class="block text-xs font-semibold text-slate-600 mb-1">Keperluan / Nama Kegiatan *</label>
-          <input type="text" id="bookKeperluan" required placeholder="Contoh: Kuliah Pengganti HHT" class="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
-        </div>
-
-        <div class="grid grid-cols-3 gap-3">
-          <div>
-            <label class="block text-xs font-semibold text-slate-600 mb-1">Tanggal *</label>
-            <input type="date" id="bookTanggal" required class="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
-          </div>
-          <div>
-            <label class="block text-xs font-semibold text-slate-600 mb-1">Jam Mulai *</label>
-            <input type="time" id="bookJamMulai" required class="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
-          </div>
-          <div>
-            <label class="block text-xs font-semibold text-slate-600 mb-1">Jam Selesai *</label>
-            <input type="time" id="bookJamSelesai" required class="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
-          </div>
-        </div>
-
-        <div class="flex justify-end gap-2 pt-4 border-t">
-          <button type="button" onclick="closeBookingModal()" class="px-4 py-2 border text-slate-600 rounded-lg text-sm hover:bg-slate-100 font-medium">Batal</button>
-          <button type="submit" id="submitBookingBtn" class="px-4 py-2 bg-blue-900 text-white rounded-lg text-sm hover:bg-blue-800 font-medium flex items-center gap-2">
-            <i class="fas fa-paper-plane"></i> Kirim Pengajuan
-          </button>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <!-- MODAL 2: ⚡ BOOKING KILAT PIMPINAN (INSTRUKSI KOMANDAN) -->
-  <div id="vipModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
-    <div class="bg-white rounded-xl shadow-2xl max-w-lg w-full overflow-hidden border-2 border-amber-500">
-      <div class="bg-gradient-to-r from-amber-600 to-amber-700 text-white px-6 py-4 flex items-center justify-between">
-        <div>
-          <h3 class="font-black text-lg flex items-center gap-2">⚡ Booking Kilat Pimpinan</h3>
-          <p class="text-xs text-amber-100">Instruksi komandan / pimpinan - Langsung terkunci & Terdisetujui</p>
-        </div>
-        <button type="button" onclick="closeVipModal()" class="text-amber-200 hover:text-white"><i class="fas fa-times text-xl"></i></button>
-      </div>
-      <form id="vipForm" onsubmit="handleSaveVipBooking(event)" class="p-6 space-y-4">
-        <div>
-          <label class="block text-xs font-semibold text-slate-700 mb-1">Pilih Ruangan *</label>
-          <select id="vipRoomCode" required class="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-amber-500 focus:outline-none font-bold">
-            <option value="">-- Pilih Ruangan --</option>
-          </select>
-        </div>
-
-        <div>
-          <label class="block text-xs font-semibold text-slate-700 mb-1">Instruksi Pimpinan / Pemohon *</label>
-          <input type="text" id="vipPemohon" required placeholder="Contoh: Dekan / Wakil Dekan I / Agenda Dekanat" class="w-full border rounded-lg px-3 py-2 text-sm">
-        </div>
-
-        <div>
-          <label class="block text-xs font-semibold text-slate-700 mb-1">Keperluan Agenda *</label>
-          <input type="text" id="vipKeperluan" required placeholder="Contoh: Rapat Koordinasi Senat Fakultas" class="w-full border rounded-lg px-3 py-2 text-sm">
-        </div>
-
-        <div class="grid grid-cols-3 gap-3">
-          <div>
-            <label class="block text-xs font-semibold text-slate-700 mb-1">Tanggal *</label>
-            <input type="date" id="vipTanggal" required class="w-full border rounded-lg px-3 py-2 text-sm">
-          </div>
-          <div>
-            <label class="block text-xs font-semibold text-slate-700 mb-1">Jam Mulai *</label>
-            <input type="time" id="vipJamMulai" required class="w-full border rounded-lg px-3 py-2 text-sm">
-          </div>
-          <div>
-            <label class="block text-xs font-semibold text-slate-700 mb-1">Jam Selesai *</label>
-            <input type="time" id="vipJamSelesai" required class="w-full border rounded-lg px-3 py-2 text-sm">
-          </div>
-        </div>
-
-        <div class="bg-amber-50 border border-amber-200 p-3 rounded-lg text-xs text-amber-900 flex items-start gap-2">
-          <i class="fas fa-info-circle text-amber-600 mt-0.5"></i>
-          <span>Pengajuan ini akan langsung otomatis berstatus <b>Disetujui</b>. Jika ada jadwal mahasiswa yang bentrok, admin dapat mengontak via WA & memindahkan ruangan mahasiswa.</span>
-        </div>
-
-        <div class="flex justify-end gap-2 pt-4 border-t">
-          <button type="button" onclick="closeVipModal()" class="px-4 py-2 border rounded-lg text-sm font-medium">Batal</button>
-          <button type="submit" id="btnSaveVip" class="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-lg text-sm font-bold shadow flex items-center gap-1.5">
-            <i class="fas fa-check-circle"></i> Eksekusi & Kunci Ruangan
-          </button>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <!-- MODAL 3: 🔄 RELOKASI / PINDAH RUANG PEMOHON -->
-  <div id="relocateModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
-    <div class="bg-white rounded-xl shadow-2xl max-w-md w-full overflow-hidden">
-      <div class="bg-slate-800 text-white px-6 py-4 flex items-center justify-between">
-        <h3 class="font-bold text-lg flex items-center gap-2"><i class="fas fa-exchange-alt text-amber-400"></i> Pindahkan Ruangan Pemohon</h3>
-        <button type="button" onclick="closeRelocateModal()" class="text-slate-300 hover:text-white"><i class="fas fa-times text-xl"></i></button>
-      </div>
-      <form id="relocateForm" onsubmit="handleSaveRelocate(event)" class="p-6 space-y-4">
-        <input type="hidden" id="relocateRowIndex">
-        
-        <div class="bg-slate-100 p-3 rounded-lg text-xs space-y-1 border">
-          <p class="text-slate-500">Pemohon: <b id="relocatePemohonName" class="text-slate-800">-</b></p>
-          <p class="text-slate-500">Ruang Asal: <b id="relocateOldRoom" class="text-slate-800">-</b></p>
-        </div>
-
-        <div>
-          <label class="block text-xs font-semibold text-slate-700 mb-1">Pilih Ruangan Baru (Pengganti) *</label>
-          <select id="relocateNewRoom" required class="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none font-bold">
-            <option value="">-- Pilih Ruangan Pengganti --</option>
-          </select>
-        </div>
-
-        <div class="flex justify-end gap-2 pt-4 border-t">
-          <button type="button" onclick="closeRelocateModal()" class="px-4 py-2 border rounded-lg text-sm font-medium">Batal</button>
-          <button type="submit" id="btnSaveRelocate" class="px-4 py-2 bg-blue-900 hover:bg-blue-800 text-white rounded-lg text-sm font-bold shadow">
-            Simpan & Pindahkan
-          </button>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <!-- MODAL 4: KELOLA RUANGAN ADMIN -->
-  <div id="roomModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
-    <div class="bg-white rounded-xl shadow-2xl max-w-lg w-full overflow-hidden">
-      <div class="bg-amber-600 text-white px-6 py-4 flex items-center justify-between">
-        <h3 id="roomModalTitle" class="font-bold text-lg">Kelola Data Ruangan</h3>
-        <button type="button" onclick="closeRoomModal()" class="text-amber-100 hover:text-white"><i class="fas fa-times text-xl"></i></button>
-      </div>
-      <form id="roomForm" onsubmit="handleSaveRoom(event)" class="p-6 space-y-3">
-        <input type="hidden" id="roomRowIndex" value="">
-        
-        <div class="grid grid-cols-2 gap-3">
-          <div>
-            <label class="block text-xs font-semibold text-slate-600 mb-1">Lantai *</label>
-            <input type="text" id="rmLantai" required placeholder="1 / 2 / 3" class="w-full border rounded-lg px-3 py-2 text-sm">
-          </div>
-          <div>
-            <label class="block text-xs font-semibold text-slate-600 mb-1">Kode Ruang *</label>
-            <input type="text" id="rmCode" required placeholder="F4.01.01" class="w-full border rounded-lg px-3 py-2 text-sm">
-          </div>
-        </div>
-
-        <div class="grid grid-cols-3 gap-2">
-          <div>
-            <label class="block text-xs font-semibold text-slate-600 mb-1">Jumlah Kursi</label>
-            <input type="number" id="rmKursi" placeholder="40" class="w-full border rounded-lg px-3 py-2 text-sm">
-          </div>
-          <div>
-            <label class="block text-xs font-semibold text-slate-600 mb-1">TV Smart</label>
-            <input type="number" id="rmTv" placeholder="1" class="w-full border rounded-lg px-3 py-2 text-sm">
-          </div>
-          <div>
-            <label class="block text-xs font-semibold text-slate-600 mb-1">AC</label>
-            <input type="number" id="rmAc" placeholder="2" class="w-full border rounded-lg px-3 py-2 text-sm">
-          </div>
-        </div>
-
-        <div class="grid grid-cols-2 gap-3">
-          <div>
-            <label class="block text-xs font-semibold text-slate-600 mb-1">Stop Kontak</label>
-            <input type="number" id="rmStopKontak" placeholder="4" class="w-full border rounded-lg px-3 py-2 text-sm">
-          </div>
-          <div>
-            <label class="block text-xs font-semibold text-slate-600 mb-1">Papan Tulis</label>
-            <input type="number" id="rmPapan" placeholder="1" class="w-full border rounded-lg px-3 py-2 text-sm">
-          </div>
-        </div>
-
-        <div class="grid grid-cols-2 gap-3">
-          <div>
-            <label class="block text-xs font-semibold text-slate-600 mb-1">Waktu Layanan</label>
-            <input type="text" id="rmLayanan" placeholder="07.00 - 17.00" class="w-full border rounded-lg px-3 py-2 text-sm">
-          </div>
-          <div>
-            <label class="block text-xs font-semibold text-slate-600 mb-1">Program / Prodi</label>
-            <input type="text" id="rmProgram" placeholder="S1 Hukum" class="w-full border rounded-lg px-3 py-2 text-sm">
-          </div>
-        </div>
-
-        <div class="flex justify-end gap-2 pt-4 border-t">
-          <button type="button" onclick="closeRoomModal()" class="px-4 py-2 border rounded-lg text-sm font-medium">Batal</button>
-          <button type="submit" id="btnSaveRoom" class="px-4 py-2 bg-amber-600 text-white rounded-lg text-sm hover:bg-amber-700 font-medium">Simpan Ruangan</button>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <!-- MODAL 5: AUTH LOGIN / REGISTER -->
-  <div id="authModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
-    <div class="bg-white rounded-xl shadow-2xl max-w-md w-full overflow-hidden">
-      <div class="bg-blue-900 text-white px-6 py-4 flex items-center justify-between">
-        <h3 id="authModalTitle" class="font-bold text-lg">Login Pengguna</h3>
-        <button type="button" onclick="closeAuthModal()" class="text-blue-200 hover:text-white"><i class="fas fa-times text-xl"></i></button>
-      </div>
-
-      <form id="loginForm" onsubmit="handleLogin(event)" class="p-6 space-y-4">
-        <div>
-          <label class="block text-xs font-semibold text-slate-600 mb-1">NIM / NIP / Username / Email</label>
-          <input type="text" id="loginUser" required placeholder="Masukkan NIM / Username" class="w-full border rounded-lg px-3 py-2 text-sm">
-        </div>
-        <div>
-          <label class="block text-xs font-semibold text-slate-600 mb-1">Password</label>
-          <input type="password" id="loginPass" required placeholder="••••••••" class="w-full border rounded-lg px-3 py-2 text-sm">
-        </div>
-        <button type="submit" class="w-full py-2 bg-blue-900 text-white rounded-lg text-sm hover:bg-blue-800 font-medium">Login</button>
-        <p class="text-xs text-center text-slate-500">Belum punya akun? <a href="#" onclick="switchAuthMode('register')" class="text-blue-600 font-bold hover:underline">Daftar Sekarang</a></p>
-      </form>
-
-      <form id="registerForm" onsubmit="handleRegister(event)" class="p-6 space-y-3 hidden">
-        <div>
-          <label class="block text-xs font-semibold text-slate-600 mb-1">Nama Lengkap *</label>
-          <input type="text" id="regNama" required class="w-full border rounded-lg px-3 py-1.5 text-sm">
-        </div>
-        <div class="grid grid-cols-2 gap-2">
-          <div>
-            <label class="block text-xs font-semibold text-slate-600 mb-1">NIM / NIP *</label>
-            <input type="text" id="regNim" required class="w-full border rounded-lg px-3 py-1.5 text-sm">
-          </div>
-          <div>
-            <label class="block text-xs font-semibold text-slate-600 mb-1">Prodi / Asal *</label>
-            <input type="text" id="regProdi" required class="w-full border rounded-lg px-3 py-1.5 text-sm">
-          </div>
-        </div>
-        <div class="grid grid-cols-2 gap-2">
-          <div>
-            <label class="block text-xs font-semibold text-slate-600 mb-1">No WhatsApp *</label>
-            <input type="tel" id="regHp" required class="w-full border rounded-lg px-3 py-1.5 text-sm">
-          </div>
-          <div>
-            <label class="block text-xs font-semibold text-slate-600 mb-1">Email *</label>
-            <input type="email" id="regEmail" required class="w-full border rounded-lg px-3 py-1.5 text-sm">
-          </div>
-        </div>
-        <div class="grid grid-cols-2 gap-2">
-          <div>
-            <label class="block text-xs font-semibold text-slate-600 mb-1">Username *</label>
-            <input type="text" id="regUsername" required class="w-full border rounded-lg px-3 py-1.5 text-sm">
-          </div>
-          <div>
-            <label class="block text-xs font-semibold text-slate-600 mb-1">Password *</label>
-            <input type="password" id="regPassword" required class="w-full border rounded-lg px-3 py-1.5 text-sm">
-          </div>
-        </div>
-        <button type="submit" class="w-full py-2 bg-emerald-600 text-white rounded-lg text-sm hover:bg-emerald-700 font-medium">Daftar Akun Baru</button>
-        <p class="text-xs text-center text-slate-500">Sudah punya akun? <a href="#" onclick="switchAuthMode('login')" class="text-blue-600 font-bold hover:underline">Login di sini</a></p>
-      </form>
-    </div>
-  </div>
-
-  <!-- MODAL 6: MODAL VERIFIKASI PIN ADMIN (AMAN, MASKED & RAPI) -->
-  <div id="adminPinModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
-    <div class="bg-white rounded-xl shadow-2xl max-w-sm w-full overflow-hidden border border-slate-200">
-      <div class="bg-slate-900 text-white px-5 py-4 flex items-center justify-between">
-        <h3 class="font-bold text-sm flex items-center gap-2 text-amber-400">
-          <i class="fas fa-lock"></i> Otentikasi Administrator
-        </h3>
-        <button type="button" onclick="closeAdminPinModal()" class="text-slate-400 hover:text-white">
-          <i class="fas fa-times text-lg"></i>
-        </button>
-      </div>
+    <!-- ========================================== -->
+    <!-- SECTION 2: DASHBOARD USER & PEMINJAMAN -->
+    <!-- ========================================== -->
+    <div id="mainDashboard" class="hidden">
       
-      <form onsubmit="verifyAdminPin(event)" class="p-5 space-y-4">
-        <div>
-          <label class="block text-xs font-semibold text-slate-600 mb-1">Masukkan PIN / Sandi Admin</label>
-          <!-- Input bertipe password agar ter-sensor titik-titik (masked) -->
-          <input type="password" id="adminPinInput" required placeholder="••••••••" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-amber-500 focus:outline-none">
-          <p id="adminPinError" class="text-xs text-rose-500 font-semibold mt-1.5 hidden">
-            <i class="fas fa-exclamation-circle mr-1"></i> PIN / Sandi Admin Salah!
-          </p>
-        </div>
+      <!-- TAB NAVIGASI UTAMA -->
+      <ul class="nav nav-tabs mb-4">
+        <li class="nav-item">
+          <button class="nav-link active" onclick="switchMainTab('rooms')"><i class="fa-solid fa-door-open me-2"></i>Daftar Ruangan</button>
+        </li>
+        <li class="nav-item">
+          <button class="nav-link" onclick="switchMainTab('bookForm')"><i class="fa-solid fa-calendar-plus me-2"></i>Ajukan Peminjaman</button>
+        </li>
+        <li class="nav-item">
+          <button class="nav-link" onclick="switchMainTab('myBookings')"><i class="fa-solid fa-clock-history me-2"></i>Status Peminjaman</button>
+        </li>
+      </ul>
 
-        <div class="flex justify-end gap-2 pt-2 border-t">
-          <button type="button" onclick="closeAdminPinModal()" class="px-3.5 py-1.5 border rounded-lg text-xs font-medium text-slate-600 hover:bg-slate-100">Batal</button>
-          <button type="submit" class="px-4 py-1.5 bg-amber-500 hover:bg-amber-600 text-slate-950 rounded-lg text-xs font-bold shadow">
-            Masuk Mode Admin
-          </button>
+      <!-- TAB 1: DAFTAR RUANGAN -->
+      <div id="tabRooms">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h4>Ketersediaan Ruangan</h4>
+          <button class="btn btn-outline-primary btn-sm" onclick="loadRooms()"><i class="fa-solid fa-rotate me-1"></i>Refresh</button>
         </div>
-      </form>
+        <div class="table-responsive">
+          <table class="table table-hover table-striped bg-white shadow-sm rounded">
+            <thead class="table-dark">
+              <tr>
+                <th>Lantai</th>
+                <th>Kode Ruang</th>
+                <th>Fasilitas Kursi</th>
+                <th>TV Smart</th>
+                <th>AC</th>
+                <th>Stop Kontak</th>
+                <th>Papan Tulis</th>
+                <th>Waktu Layanan</th>
+              </tr>
+            </thead>
+            <tbody id="roomsTableBody">
+              <tr><td colspan="8" class="text-center py-4">Memuat data ruangan...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- TAB 2: FORM AJUKAN PEMINJAMAN -->
+      <div id="tabBookForm" class="hidden">
+        <div class="card shadow-sm border-0">
+          <div class="card-body">
+            <h4 class="card-title mb-4">Formulir Peminjaman Ruangan</h4>
+            <form onsubmit="handleBooking(event)">
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <label class="form-label">Pilih Ruangan</label>
+                  <select id="bookRoomCode" class="form-select" required>
+                    <option value="">-- Pilih Ruangan --</option>
+                  </select>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">Tanggal Pinjam</label>
+                  <input type="date" id="bookTanggal" class="form-control" required>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">Jam Mulai</label>
+                  <input type="time" id="bookJamMulai" class="form-control" required>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">Jam Selesai</label>
+                  <input type="time" id="bookJamSelesai" class="form-control" required>
+                </div>
+                <div class="col-12">
+                  <label class="form-label">Keperluan / Kegiatan</label>
+                  <textarea id="bookKeperluan" class="form-control" rows="3" placeholder="Jelaskan agenda/kegiatan secara rinci" required></textarea>
+                </div>
+                <div class="col-12">
+                  <button type="submit" id="btnBookSubmit" class="btn btn-primary px-4">
+                    <span id="bookSpinner" class="spinner-border spinner-border-sm me-2 hidden"></span>Kirim Pengajuan
+                  </button>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 3: STATUS PEMINJAMAN -->
+      <div id="tabMyBookings" class="hidden">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h4>Riwayat Pengajuan Peminjaman</h4>
+          <button class="btn btn-outline-primary btn-sm" onclick="loadBookings()"><i class="fa-solid fa-rotate me-1"></i>Refresh</button>
+        </div>
+        <div class="table-responsive">
+          <table class="table table-bordered bg-white shadow-sm">
+            <thead class="table-secondary">
+              <tr>
+                <th>Waktu Input</th>
+                <th>Kode Ruang</th>
+                <th>Pemohon</th>
+                <th>NIM/NIP</th>
+                <th>Tanggal</th>
+                <th>Jam</th>
+                <th>Keperluan</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="bookingsTableBody">
+              <tr><td colspan="8" class="text-center py-4">Memuat data peminjaman...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
     </div>
+
   </div>
 
   <script>
-    // MASUKKAN API URL APPS SCRIPT KAMU DI SINI
-    const API_URL = "https://script.google.com/macros/s/AKfycbwaJDJuSi6F6Z-lQycc3c3iW570d3b_zGqmgDRm-tbdeUuLXpTBGpqcgIKSmiUiOjtY/exec";
-    
-    // KATASANDI RAHASIA ADMIN (Silakan ganti sesuai keinginanmu)
-    const SECRET_ADMIN_PIN = "b1sm1ll4h1713"; 
+    // =========================================================================
+    // PASTEKAN URL WEB APP DEPLOYMENT GOOGLE APPS SCRIPT KAMU DI SINI
+    // =========================================================================
+    const API_URL = "https://script.google.com/macros/s/AKfycbwaJDJuSi6F6Z-lQycc3c3iW570d3b_zGqmgDRm-tbdeUuLXpTBGpqcgIKSmiUiOjtY/exec"; 
 
-    let rawRoomsData = [];
-    let rawBookingsData = [];
-    let isAdminMode = false;
     let currentUser = null;
 
-    document.addEventListener("DOMContentLoaded", function() {
-      loadRooms();
-      loadBookings();
-    });
-
-    // --- TAB CONTROLLER ---
-    function switchUserTab(tab) {
-      const btnRooms = document.getElementById("tabRoomsBtn");
-      const btnStatus = document.getElementById("tabStatusBtn");
-      
-      if(tab === 'rooms') {
-        document.getElementById("viewRooms").classList.remove("hidden");
-        document.getElementById("viewStatus").classList.add("hidden");
-        btnRooms.className = "py-3 text-blue-900 border-b-2 border-blue-900 font-bold flex items-center gap-2";
-        btnStatus.className = "py-3 text-slate-500 hover:text-blue-900 flex items-center gap-2";
-      } else {
-        document.getElementById("viewRooms").classList.add("hidden");
-        document.getElementById("viewStatus").classList.remove("hidden");
-        btnStatus.className = "py-3 text-blue-900 border-b-2 border-blue-900 font-bold flex items-center gap-2";
-        btnRooms.className = "py-3 text-slate-500 hover:text-blue-900 flex items-center gap-2";
-        loadBookings();
-      }
-    }
-
-    // --- MODE ADMIN CONTROLLER & PIN MODAL ---
-    function toggleAdminMode() {
-      if(!isAdminMode) {
-        document.getElementById("adminPinInput").value = "";
-        document.getElementById("adminPinError").classList.add("hidden");
-        document.getElementById("adminPinModal").classList.remove("hidden");
-        document.getElementById("adminPinModal").classList.add("flex");
-        setTimeout(() => document.getElementById("adminPinInput").focus(), 100);
-      } else {
-        isAdminMode = false;
-        disableAdminUI();
-      }
-    }
-
-    function closeAdminPinModal() {
-      document.getElementById("adminPinModal").classList.add("hidden");
-      document.getElementById("adminPinModal").classList.remove("flex");
-    }
-
-    function verifyAdminPin(e) {
-      e.preventDefault();
-      const inputPin = document.getElementById("adminPinInput").value;
-
-      if(inputPin === SECRET_ADMIN_PIN || inputPin === "123456" || inputPin === "admin") {
-        isAdminMode = true;
-        closeAdminPinModal();
-        enableAdminUI();
-      } else {
-        document.getElementById("adminPinError").classList.remove("hidden");
-        document.getElementById("adminPinInput").value = "";
-        document.getElementById("adminPinInput").focus();
-      }
-    }
-
-    function enableAdminUI() {
-      document.getElementById("topNavbar").className = "bg-slate-900 text-white shadow-lg sticky top-0 z-50 transition-colors border-b border-amber-500";
-      document.getElementById("adminBadge").classList.remove("hidden");
-      document.getElementById("adminPanel").classList.remove("hidden");
-      document.getElementById("userNavTabs").classList.add("hidden");
-      document.getElementById("btnAddRoomAdmin").classList.remove("hidden");
-      document.getElementById("thAdminAction").classList.remove("hidden");
-      document.getElementById("adminBtnText").innerText = "Keluar Admin";
-      
-      switchAdminTab('manageRooms');
-      renderRoomsTable(rawRoomsData);
-      loadBookings();
-    }
-
-    function disableAdminUI() {
-      document.getElementById("topNavbar").className = "bg-blue-900 text-white shadow-lg sticky top-0 z-50 transition-colors";
-      document.getElementById("adminBadge").classList.add("hidden");
-      document.getElementById("adminPanel").classList.add("hidden");
-      document.getElementById("userNavTabs").classList.remove("hidden");
-      document.getElementById("btnAddRoomAdmin").classList.add("hidden");
-      document.getElementById("thAdminAction").classList.add("hidden");
-      document.getElementById("adminBtnText").innerText = "Mode Admin";
-
-      switchUserTab('rooms');
-      renderRoomsTable(rawRoomsData);
-    }
-
-    function switchAdminTab(adminTab) {
-      if(adminTab === 'manageRooms') {
-        document.getElementById("viewRooms").classList.remove("hidden");
-        document.getElementById("viewStatus").classList.add("hidden");
-      } else {
-        document.getElementById("viewRooms").classList.add("hidden");
-        document.getElementById("viewStatus").classList.remove("hidden");
-        loadBookings();
-      }
-    }
-
-    // --- RUANGAN (LOAD & RENDER) ---
-    function loadRooms() {
-      removeOldScript("jsonpGetRooms");
-      const script = document.createElement("script");
-      script.id = "jsonpGetRooms";
-      script.src = `${API_URL}?action=getRooms&callback=handleRoomsResponse`;
-      document.body.appendChild(script);
-    }
-
-    function handleRoomsResponse(res) {
-      if(res.status === "success") {
-        rawRoomsData = res.data;
-        document.getElementById("statTotalRooms").innerText = rawRoomsData.length;
+    // Helper untuk memanggil Backend Apps Script (JSONP Bypass CORS)
+    function apiRequest(action, params = {}) {
+      return new Promise((resolve, reject) => {
+        const callbackName = 'jsonp_cb_' + Math.floor(Math.random() * 1000000);
+        params.action = action;
+        params.callback = callbackName;
         
-        populateRoomDropdowns(rawRoomsData);
-        renderRoomsTable(rawRoomsData);
-      }
+        const queryString = Object.keys(params)
+          .map(key => encodeURIComponent(key) + '=' + encodeURIComponent(params[key]))
+          .join('&');
+          
+        const script = document.createElement('script');
+        script.src = `${API_URL}?${queryString}`;
+        
+        window[callbackName] = function(data) {
+          delete window[callbackName];
+          document.body.removeChild(script);
+          resolve(data);
+        };
+        
+        script.onerror = function() {
+          delete window[callbackName];
+          document.body.removeChild(script);
+          reject(new Error("Gagal terhubung ke Apps Script Backend!"));
+        };
+        
+        document.body.appendChild(script);
+      });
     }
 
-    function populateRoomDropdowns(rooms) {
-      const vipSelect = document.getElementById("vipRoomCode");
-      const relocateSelect = document.getElementById("relocateNewRoom");
+    // UTILS NOTIFIKASI
+    function showAlert(msg, type = "success") {
+      const alertBox = document.getElementById('alertBox');
+      const alertMessage = document.getElementById('alertMessage');
+      alertBox.className = `alert alert-${type} alert-dismissible fade show`;
+      alertMessage.innerText = msg;
+      alertBox.classList.remove('hidden');
+    }
+
+    function hideAlert() {
+      document.getElementById('alertBox').classList.add('hidden');
+    }
+
+    // NAVIGASI TAB AUTH
+    function switchAuthTab(type) {
+      hideAlert();
+      const tabs = document.querySelectorAll('#authTab .nav-link');
+      tabs[0].classList.toggle('active', type === 'login');
+      tabs[1].classList.toggle('active', type === 'register');
       
-      vipSelect.innerHTML = `<option value="">-- Pilih Ruangan --</option>`;
-      relocateSelect.innerHTML = `<option value="">-- Pilih Ruangan Pengganti --</option>`;
-
-      rooms.forEach(r => {
-        vipSelect.innerHTML += `<option value="${r.code}">${r.code} (Lantai ${r.lantai})</option>`;
-        relocateSelect.innerHTML += `<option value="${r.code}">${r.code} (Lantai ${r.lantai})</option>`;
-      });
+      document.getElementById('formLogin').classList.toggle('hidden', type !== 'login');
+      document.getElementById('formRegister').classList.toggle('hidden', type !== 'register');
     }
 
-    function renderRoomsTable(data) {
-      const tbody = document.getElementById("roomTableBody");
-      tbody.innerHTML = "";
+    // NAVIGASI TAB UTAMA
+    function switchMainTab(tabName) {
+      document.getElementById('tabRooms').classList.toggle('hidden', tabName !== 'rooms');
+      document.getElementById('tabBookForm').classList.toggle('hidden', tabName !== 'bookForm');
+      document.getElementById('tabMyBookings').classList.toggle('hidden', tabName !== 'myBookings');
+      
+      const links = document.querySelectorAll('#mainDashboard .nav-link');
+      links[0].classList.toggle('active', tabName === 'rooms');
+      links[1].classList.toggle('active', tabName === 'bookForm');
+      links[2].classList.toggle('active', tabName === 'myBookings');
 
-      if(!data || data.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="10" class="text-center py-6 text-slate-400">Tidak ada data ruangan.</td></tr>`;
-        return;
-      }
+      if (tabName === 'rooms') loadRooms();
+      if (tabName === 'myBookings') loadBookings();
+    }
 
-      data.forEach((room) => {
-        const tr = document.createElement("tr");
-        tr.className = "hover:bg-slate-50 transition border-b";
+    // HANDLE LOGIN
+    async function handleLogin(e) {
+      e.preventDefault();
+      hideAlert();
+      
+      const username = document.getElementById('loginUsername').value.trim();
+      const password = document.getElementById('loginPassword').value.trim();
 
-        let actionBtn = `<button onclick="openBookingModal('${room.code}')" class="bg-blue-600 hover:bg-blue-700 text-white text-xs px-3 py-1.5 rounded-md font-medium shadow-sm"><i class="fas fa-calendar-check mr-1"></i> Pinjam</button>`;
+      document.getElementById('loginSpinner').classList.remove('hidden');
+      document.getElementById('btnLoginSubmit').disabled = true;
 
-        if(isAdminMode) {
-          actionBtn = `
-            <div class="flex justify-center gap-1">
-              <button onclick="editRoom(${room.rowIndex})" class="bg-amber-600 hover:bg-amber-700 text-white text-xs px-2.5 py-1 rounded" title="Edit"><i class="fas fa-edit"></i></button>
-              <button onclick="deleteRoom(${room.rowIndex})" class="bg-rose-600 hover:bg-rose-700 text-white text-xs px-2.5 py-1 rounded" title="Hapus"><i class="fas fa-trash"></i></button>
-            </div>
-          `;
+      try {
+        const res = await apiRequest('loginUser', { username, password });
+        if (res.status === 'success') {
+          currentUser = res.user;
+          showAlert(`Selamat datang, ${currentUser.nama}!`, 'success');
+          
+          document.getElementById('authSection').classList.add('hidden');
+          document.getElementById('mainDashboard').classList.remove('hidden');
+          document.getElementById('userGreeting').classList.remove('hidden');
+          document.getElementById('userGreeting').innerText = `Halo, ${currentUser.nama}`;
+          document.getElementById('btnLogout').classList.remove('hidden');
+          
+          loadRooms();
+        } else {
+          showAlert(res.message, 'danger');
         }
-
-        tr.innerHTML = `
-          <td class="py-3 px-4 text-center font-medium text-slate-700">${room.lantai}</td>
-          <td class="py-3 px-4 text-center font-bold text-blue-900">${room.code}</td>
-          <td class="py-3 px-4 text-center font-semibold">${room.kursi}</td>
-          <td class="py-3 px-4 text-center">${room.tvSmart}</td>
-          <td class="py-3 px-4 text-center">${room.ac}</td>
-          <td class="py-3 px-4 text-center">${room.stopKontak}</td>
-          <td class="py-3 px-4 text-center">${room.papanTulis}</td>
-          <td class="py-3 px-4 text-center text-xs text-slate-500">${room.waktuLayanan}</td>
-          <td class="py-3 px-4 text-center"><span class="bg-blue-100 text-blue-800 text-xs px-2.5 py-0.5 rounded-full font-semibold">${room.program || '-'}</span></td>
-          <td class="py-3 px-4 text-center">${actionBtn}</td>
-        `;
-        tbody.appendChild(tr);
-      });
+      } catch (err) {
+        showAlert(err.message, 'danger');
+      } finally {
+        document.getElementById('loginSpinner').classList.add('hidden');
+        document.getElementById('btnLoginSubmit').disabled = false;
+      }
     }
 
-    // --- ⚡ FITUR INSTRUKSI KOMANDAN (VIP BOOKING) ---
-    function openVipModal() {
-      document.getElementById("vipForm").reset();
-      document.getElementById("vipModal").classList.remove("hidden");
-      document.getElementById("vipModal").classList.add("flex");
-    }
-
-    function closeVipModal() {
-      document.getElementById("vipModal").classList.add("hidden");
-      document.getElementById("vipModal").classList.remove("flex");
-    }
-
-    function handleSaveVipBooking(e) {
+    // HANDLE REGISTRASI
+    async function handleRegister(e) {
       e.preventDefault();
-      const btn = document.getElementById("btnSaveVip");
-      btn.disabled = true;
-      btn.innerHTML = `<i class="fas fa-circle-notch fa-spin"></i> Mengunci Ruangan...`;
+      hideAlert();
 
-      const roomCode = encodeURIComponent(document.getElementById("vipRoomCode").value);
-      const pemohon = encodeURIComponent(document.getElementById("vipPemohon").value);
-      const keperluan = encodeURIComponent(document.getElementById("vipKeperluan").value);
-      const tanggal = encodeURIComponent(document.getElementById("vipTanggal").value);
-      const jamMulai = encodeURIComponent(document.getElementById("vipJamMulai").value);
-      const jamSelesai = encodeURIComponent(document.getElementById("vipJamSelesai").value);
+      const params = {
+        nama: document.getElementById('regNama').value.trim(),
+        prodi: document.getElementById('regProdi').value.trim(),
+        nim: document.getElementById('regNim').value.trim(),
+        hp: document.getElementById('regHp').value.trim(),
+        email: document.getElementById('regEmail').value.trim(),
+        username: document.getElementById('regUsername').value.trim(),
+        password: document.getElementById('regPassword').value.trim()
+      };
 
-      removeOldScript("jsonpAddVipBooking");
-      const script = document.createElement("script");
-      script.id = "jsonpAddVipBooking";
-      script.src = `${API_URL}?action=addVipBooking&roomCode=${roomCode}&pemohon=${pemohon}&keperluan=${keperluan}&tanggal=${tanggal}&jamMulai=${jamMulai}&jamSelesai=${jamSelesai}&callback=handleVipBookingResponse`;
-      document.body.appendChild(script);
-    }
+      document.getElementById('regSpinner').classList.remove('hidden');
+      document.getElementById('btnRegSubmit').disabled = true;
 
-    function handleVipBookingResponse(res) {
-      const btn = document.getElementById("btnSaveVip");
-      btn.disabled = false;
-      btn.innerHTML = `<i class="fas fa-check-circle"></i> Eksekusi & Kunci Ruangan`;
-
-      alert(res.message);
-      if(res.status === "success") {
-        closeVipModal();
-        switchAdminTab('manageBookings');
-      }
-    }
-
-    // --- 📱 WA DIRECT NEGOSIASI ---
-    function sendWANegotiation(pemohon, hp, roomCode, tanggal, jam) {
-      let formattedHp = (hp || "").trim();
-      if(formattedHp.startsWith("0")) formattedHp = "62" + formattedHp.slice(1);
-
-      if(!formattedHp || formattedHp.length < 8) {
-        alert("Nomor WhatsApp pemohon tidak valid!");
-        return;
-      }
-
-      const text = `Halo Kak *${pemohon}*,\n\nSalam dari Pengelola Ruangan FH UNESA.\n\nMohon maaf sekali terkait pengajuan peminjaman ruang *${roomCode}* pada tanggal *${tanggal} (${jam})*.\n\nDikarenakan ada agenda kegiatan mendadak dari Pimpinan Fakultas, kami bermaksud menawarkan penawaran solusi relokasi / pindah ruangan ke *ruangan lain yang masih kosong* di jam yang sama.\n\nApakah Kakak berkenan? Mohon konfirmasinya ya Kak. Terima kasih banyak atas pengertiannya 🙏`;
-
-      const waUrl = `https://wa.me/${formattedHp}?text=${encodeURIComponent(text)}`;
-      window.open(waUrl, '_blank');
-    }
-
-    // --- 🔄 FITUR PINDAH RUANGAN (RELOKASI) ---
-    function openRelocateModal(rowIndex, oldRoom, pemohon) {
-      document.getElementById("relocateRowIndex").value = rowIndex;
-      document.getElementById("relocatePemohonName").innerText = pemohon;
-      document.getElementById("relocateOldRoom").innerText = oldRoom;
-
-      document.getElementById("relocateModal").classList.remove("hidden");
-      document.getElementById("relocateModal").classList.add("flex");
-    }
-
-    function closeRelocateModal() {
-      document.getElementById("relocateModal").classList.add("hidden");
-      document.getElementById("relocateModal").classList.remove("flex");
-    }
-
-    function handleSaveRelocate(e) {
-      e.preventDefault();
-      const btn = document.getElementById("btnSaveRelocate");
-      btn.disabled = true;
-      btn.innerText = "Memindahkan...";
-
-      const idx = document.getElementById("relocateRowIndex").value;
-      const newRoom = encodeURIComponent(document.getElementById("relocateNewRoom").value);
-
-      removeOldScript("jsonpRelocateBooking");
-      const script = document.createElement("script");
-      script.id = "jsonpRelocateBooking";
-      script.src = `${API_URL}?action=relocateBooking&rowIndex=${idx}&newRoomCode=${newRoom}&callback=handleRelocateResponse`;
-      document.body.appendChild(script);
-    }
-
-    function handleRelocateResponse(res) {
-      document.getElementById("btnSaveRelocate").disabled = false;
-      document.getElementById("btnSaveRelocate").innerText = "Simpan & Pindahkan";
-
-      alert(res.message);
-      if(res.status === "success") {
-        closeRelocateModal();
-        loadBookings();
-      }
-    }
-
-    // --- PEMINJAMAN USER (LOAD & RENDER) ---
-    function loadBookings() {
-      removeOldScript("jsonpGetBookings");
-      const script = document.createElement("script");
-      script.id = "jsonpGetBookings";
-      script.src = `${API_URL}?action=getBookings&callback=handleBookingsResponse`;
-      document.body.appendChild(script);
-    }
-
-    function handleBookingsResponse(res) {
-      if(res.status === "success") {
-        rawBookingsData = res.data;
-        renderBookingsTable(rawBookingsData);
-      }
-    }
-
-    function renderBookingsTable(data) {
-      const tbody = document.getElementById("bookingTableBody");
-      tbody.innerHTML = "";
-
-      let pending = 0, approved = 0, rejected = 0;
-
-      data.forEach(b => {
-        if(b.status === "Menunggu Persetujuan") pending++;
-        if(b.status === "Disetujui") approved++;
-        if(b.status === "Ditolak") rejected++;
-
-        let statusBadge = `<span class="bg-amber-100 text-amber-800 text-xs px-3 py-1 rounded-full font-bold">🟡 Menunggu</span>`;
-        if(b.status === "Disetujui") statusBadge = `<span class="bg-emerald-100 text-emerald-800 text-xs px-3 py-1 rounded-full font-bold">🟢 Disetujui</span>`;
-        if(b.status === "Ditolak") statusBadge = `<span class="bg-rose-100 text-rose-800 text-xs px-3 py-1 rounded-full font-bold">🔴 Ditolak</span>`;
-
-        let adminActionTd = "";
-        if(isAdminMode) {
-          adminActionTd = `
-            <td class="py-3 px-4 text-center">
-              <div class="flex flex-col gap-1 items-center">
-                <div class="flex gap-1">
-                  <button onclick="updateStatus(${b.rowIndex}, 'Disetujui')" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs px-2 py-1 rounded shadow" title="Setujui"><i class="fas fa-check"></i> ACC</button>
-                  <button onclick="updateStatus(${b.rowIndex}, 'Ditolak')" class="bg-rose-600 hover:bg-rose-700 text-white text-xs px-2 py-1 rounded shadow" title="Tolak"><i class="fas fa-times"></i> Tolak</button>
-                </div>
-                <div class="flex gap-1 pt-1 border-t w-full justify-center">
-                  <button onclick="sendWANegotiation('${b.pemohon}', '${b.hp}', '${b.roomCode}', '${b.tanggal}', '${b.jam}')" class="bg-emerald-500 hover:bg-emerald-600 text-white text-xs px-2 py-0.5 rounded shadow flex items-center gap-1" title="Nego WA"><i class="fab fa-whatsapp"></i> WA</button>
-                  <button onclick="openRelocateModal(${b.rowIndex}, '${b.roomCode}', '${b.pemohon}')" class="bg-slate-700 hover:bg-slate-800 text-white text-xs px-2 py-0.5 rounded shadow flex items-center gap-1" title="Pindah Ruang"><i class="fas fa-exchange-alt"></i> Pindah</button>
-                </div>
-              </div>
-            </td>`;
+      try {
+        const res = await apiRequest('registerUser', params);
+        if (res.status === 'success') {
+          showAlert(res.message, 'success');
+          document.getElementById('formRegister').reset();
+          switchAuthTab('login');
+        } else {
+          showAlert(res.message, 'danger');
         }
-
-        const tr = document.createElement("tr");
-        tr.className = "hover:bg-slate-50 transition border-b";
-        tr.innerHTML = `
-          <td class="py-3 px-4 text-xs text-slate-500">${b.waktuInput}</td>
-          <td class="py-3 px-4 text-center font-bold text-blue-900">${b.roomCode}</td>
-          <td class="py-3 px-4 font-medium">${b.pemohon}</td>
-          <td class="py-3 px-4 text-xs">${b.tanggal}<br><b class="text-slate-700">${b.jam}</b></td>
-          <td class="py-3 px-4">${b.keperluan}</td>
-          <td class="py-3 px-4 text-center">${statusBadge}</td>
-          ${adminActionTd}
-        `;
-        tbody.appendChild(tr);
-      });
-
-      document.getElementById("statPending").innerText = pending;
-      document.getElementById("statApproved").innerText = approved;
-      document.getElementById("statRejected").innerText = rejected;
-      document.getElementById("adminPendingBadge").innerText = pending;
-    }
-
-    function updateStatus(rowIndex, newStatus) {
-      if(!confirm(`Ubah status peminjaman ini menjadi "${newStatus}"?`)) return;
-
-      removeOldScript("jsonpUpdateStatus");
-      const script = document.createElement("script");
-      script.id = "jsonpUpdateStatus";
-      script.src = `${API_URL}?action=updateBookingStatus&rowIndex=${rowIndex}&newStatus=${encodeURIComponent(newStatus)}&callback=handleUpdateStatusResponse`;
-      document.body.appendChild(script);
-    }
-
-    function handleUpdateStatusResponse(res) {
-      if(res.status === "success") {
-        alert("Status berhasil diperbarui!");
-        loadBookings();
+      } catch (err) {
+        showAlert(err.message, 'danger');
+      } finally {
+        document.getElementById('regSpinner').classList.add('hidden');
+        document.getElementById('btnRegSubmit').disabled = false;
       }
     }
 
-    // --- FORM MODAL AUXILIARY ---
-    function openBookingModal(code) {
-      document.getElementById("bookingRoomCode").value = code;
-      document.getElementById("bookingRoomTitle").innerText = `Ruang: ${code}`;
-      document.getElementById("bookingForm").reset();
-      if(currentUser) {
-        document.getElementById("bookNama").value = currentUser.nama;
-        document.getElementById("bookNim").value = currentUser.nim;
-        document.getElementById("bookHp").value = currentUser.hp;
-      }
-      document.getElementById("bookingModal").classList.remove("hidden");
-      document.getElementById("bookingModal").classList.add("flex");
-    }
-    function closeBookingModal() {
-      document.getElementById("bookingModal").classList.add("hidden");
-      document.getElementById("bookingModal").classList.remove("flex");
-    }
-    function handleSaveBooking(e) {
-      e.preventDefault();
-      const btn = document.getElementById("submitBookingBtn");
-      btn.disabled = true;
-      btn.innerHTML = `<i class="fas fa-circle-notch fa-spin"></i> Mengirim...`;
+    // LOAD DATA RUANGAN
+    async function loadRooms() {
+      const tbody = document.getElementById('roomsTableBody');
+      const selectRoom = document.getElementById('bookRoomCode');
+      
+      try {
+        const res = await apiRequest('getRooms');
+        if (res.status === 'success') {
+          tbody.innerHTML = '';
+          selectRoom.innerHTML = '<option value="">-- Pilih Ruangan --</option>';
 
-      const roomCode = encodeURIComponent(document.getElementById("bookingRoomCode").value);
-      const nama = encodeURIComponent(document.getElementById("bookNama").value);
-      const nim = encodeURIComponent(document.getElementById("bookNim").value);
-      const hp = encodeURIComponent(document.getElementById("bookHp").value);
-      const keperluan = encodeURIComponent(document.getElementById("bookKeperluan").value);
-      const tanggal = encodeURIComponent(document.getElementById("bookTanggal").value);
-      const jamMulai = encodeURIComponent(document.getElementById("bookJamMulai").value);
-      const jamSelesai = encodeURIComponent(document.getElementById("bookJamSelesai").value);
+          if (res.data.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="8" class="text-center">Belum ada data ruangan.</td></tr>';
+            return;
+          }
 
-      removeOldScript("jsonpAddBooking");
-      const script = document.createElement("script");
-      script.id = "jsonpAddBooking";
-      script.src = `${API_URL}?action=addBooking&roomCode=${roomCode}&nama=${nama}&nim=${nim}&hp=${hp}&keperluan=${keperluan}&tanggal=${tanggal}&jamMulai=${jamMulai}&jamSelesai=${jamSelesai}&callback=handleBookingResponse`;
-      document.body.appendChild(script);
-    }
-    function handleBookingResponse(res) {
-      const btn = document.getElementById("submitBookingBtn");
-      btn.disabled = false;
-      btn.innerHTML = `<i class="fas fa-paper-plane"></i> Kirim Pengajuan`;
+          res.data.forEach(room => {
+            tbody.innerHTML += `
+              <tr>
+                <td>${room.lantai}</td>
+                <td><strong>${room.code}</strong></td>
+                <td>${room.kursi}</td>
+                <td>${room.tvSmart}</td>
+                <td>${room.ac}</td>
+                <td>${room.stopKontak}</td>
+                <td>${room.papanTulis}</td>
+                <td>${room.waktuLayanan}</td>
+              </tr>
+            `;
 
-      if (res.status === "success") {
-        alert("🎉 Pengajuan Berhasil Dikirim!");
-        closeBookingModal();
-        switchUserTab('status');
-      } else {
-        alert(res.message);
+            selectRoom.innerHTML += `<option value="${room.code}">${room.code} (Lantai ${room.lantai})</option>`;
+          });
+        }
+      } catch (err) {
+        tbody.innerHTML = `<tr><td colspan="8" class="text-center text-danger">Gagal memuat ruangan: ${err.message}</td></tr>`;
       }
     }
 
-    // --- CRUD RUANGAN ---
-    function openRoomModal() {
-      document.getElementById("roomForm").reset();
-      document.getElementById("roomRowIndex").value = "";
-      document.getElementById("roomModalTitle").innerText = "Tambah Ruangan Baru";
-      document.getElementById("roomModal").classList.remove("hidden");
-      document.getElementById("roomModal").classList.add("flex");
-    }
-    function closeRoomModal() {
-      document.getElementById("roomModal").classList.add("hidden");
-      document.getElementById("roomModal").classList.remove("flex");
-    }
-    function editRoom(rowIndex) {
-      const room = rawRoomsData.find(r => r.rowIndex === rowIndex);
-      if(!room) return;
-      document.getElementById("roomRowIndex").value = room.rowIndex;
-      document.getElementById("rmLantai").value = room.lantai;
-      document.getElementById("rmCode").value = room.code;
-      document.getElementById("rmKursi").value = room.kursi;
-      document.getElementById("rmTv").value = room.tvSmart;
-      document.getElementById("rmAc").value = room.ac;
-      document.getElementById("rmStopKontak").value = room.stopKontak;
-      document.getElementById("rmPapan").value = room.papanTulis;
-      document.getElementById("rmLayanan").value = room.waktuLayanan;
-      document.getElementById("rmProgram").value = room.program;
-
-      document.getElementById("roomModalTitle").innerText = "Edit Data Ruangan";
-      document.getElementById("roomModal").classList.remove("hidden");
-      document.getElementById("roomModal").classList.add("flex");
-    }
-    function handleSaveRoom(e) {
+    // HANDLE AJUKAN PEMINJAMAN
+    async function handleBooking(e) {
       e.preventDefault();
-      const btn = document.getElementById("btnSaveRoom");
-      btn.disabled = true;
+      hideAlert();
 
-      const idx = document.getElementById("roomRowIndex").value;
-      const l = encodeURIComponent(document.getElementById("rmLantai").value);
-      const c = encodeURIComponent(document.getElementById("rmCode").value);
-      const k = encodeURIComponent(document.getElementById("rmKursi").value);
-      const tv = encodeURIComponent(document.getElementById("rmTv").value);
-      const ac = encodeURIComponent(document.getElementById("rmAc").value);
-      const sk = encodeURIComponent(document.getElementById("rmStopKontak").value);
-      const pt = encodeURIComponent(document.getElementById("rmPapan").value);
-      const wl = encodeURIComponent(document.getElementById("rmLayanan").value);
-      const pr = encodeURIComponent(document.getElementById("rmProgram").value);
+      const params = {
+        roomCode: document.getElementById('bookRoomCode').value,
+        nama: currentUser.nama,
+        nim: currentUser.nim,
+        hp: currentUser.hp,
+        keperluan: document.getElementById('bookKeperluan').value.trim(),
+        tanggal: document.getElementById('bookTanggal').value,
+        jamMulai: document.getElementById('bookJamMulai').value,
+        jamSelesai: document.getElementById('bookJamSelesai').value
+      };
 
-      removeOldScript("jsonpSaveRoom");
-      const script = document.createElement("script");
-      script.id = "jsonpSaveRoom";
-      script.src = `${API_URL}?action=saveRoom&rowIndex=${idx}&lantai=${l}&code=${c}&kursi=${k}&tvSmart=${tv}&ac=${ac}&stopKontak=${sk}&papanTulis=${pt}&waktuLayanan=${wl}&program=${pr}&callback=handleSaveRoomResponse`;
-      document.body.appendChild(script);
-    }
-    function handleSaveRoomResponse(res) {
-      document.getElementById("btnSaveRoom").disabled = false;
-      if(res.status === "success") {
-        alert(res.message);
-        closeRoomModal();
-        loadRooms();
-      } else alert("Gagal: " + res.message);
-    }
-    function deleteRoom(rowIndex) {
-      if(!confirm("Hapus ruangan ini?")) return;
-      removeOldScript("jsonpDeleteRoom");
-      const script = document.createElement("script");
-      script.id = "jsonpDeleteRoom";
-      script.src = `${API_URL}?action=deleteRoom&rowIndex=${rowIndex}&callback=handleDeleteRoomResponse`;
-      document.body.appendChild(script);
-    }
-    function handleDeleteRoomResponse(res) {
-      alert(res.message);
-      if(res.status === "success") loadRooms();
-    }
+      document.getElementById('bookSpinner').classList.remove('hidden');
+      document.getElementById('btnBookSubmit').disabled = true;
 
-    // --- SEARCH / FILTER ---
-    function filterRooms() {
-      const q = document.getElementById("searchInput").value.toLowerCase();
-      const filtered = rawRoomsData.filter(r => String(r.code).toLowerCase().includes(q) || String(r.lantai).toLowerCase().includes(q));
-      renderRoomsTable(filtered);
-    }
-    function filterStatus() {
-      const q = document.getElementById("searchStatusInput").value.toLowerCase();
-      const filtered = rawBookingsData.filter(b => 
-        String(b.pemohon).toLowerCase().includes(q) || 
-        String(b.roomCode).toLowerCase().includes(q) ||
-        String(b.status).toLowerCase().includes(q)
-      );
-      renderBookingsTable(filtered);
-    }
-
-    // --- AUTH LOGIC ---
-    function openAuthModal(m) {
-      switchAuthMode(m);
-      document.getElementById("authModal").classList.remove("hidden");
-      document.getElementById("authModal").classList.add("flex");
-    }
-    function closeAuthModal() {
-      document.getElementById("authModal").classList.add("hidden");
-      document.getElementById("authModal").classList.remove("flex");
-    }
-    function switchAuthMode(m) {
-      if(m === 'login') {
-        document.getElementById("authModalTitle").innerText = "Login Pengguna";
-        document.getElementById("loginForm").classList.remove("hidden");
-        document.getElementById("registerForm").classList.add("hidden");
-      } else {
-        document.getElementById("authModalTitle").innerText = "Daftar Akun Baru";
-        document.getElementById("loginForm").classList.add("hidden");
-        document.getElementById("registerForm").classList.remove("hidden");
+      try {
+        const res = await apiRequest('addBooking', params);
+        if (res.status === 'success') {
+          showAlert(res.message, 'success');
+          e.target.reset();
+          switchMainTab('myBookings');
+        } else {
+          showAlert(res.message, 'danger');
+        }
+      } catch (err) {
+        showAlert(err.message, 'danger');
+      } finally {
+        document.getElementById('bookSpinner').classList.add('hidden');
+        document.getElementById('btnBookSubmit').disabled = false;
       }
     }
-    function handleLogin(e) {
-      e.preventDefault();
-      const u = encodeURIComponent(document.getElementById("loginUser").value);
-      const p = encodeURIComponent(document.getElementById("loginPass").value);
 
-      removeOldScript("jsonpLogin");
-      const script = document.createElement("script");
-      script.id = "jsonpLogin";
-      script.src = `${API_URL}?action=loginUser&username=${u}&password=${p}&callback=handleLoginResponse`;
-      document.body.appendChild(script);
-    }
-    function handleLoginResponse(res) {
-      if(res.status === "success") {
-        currentUser = res.user;
-        alert(`Selamat datang, ${currentUser.nama}!`);
-        closeAuthModal();
-        document.getElementById("authUserSection").innerHTML = `
-          <div class="flex items-center gap-2 bg-blue-800 px-3 py-1.5 rounded-lg text-xs">
-            <i class="fas fa-user-circle text-sm text-blue-200"></i>
-            <span class="font-semibold">${currentUser.nama.split(' ')[0]}</span>
-            <button onclick="logoutUser()" class="text-rose-300 hover:text-rose-100 ml-1" title="Logout"><i class="fas fa-power-off"></i></button>
-          </div>`;
-      } else { alert(res.message); }
-    }
-    function handleRegister(e) {
-      e.preventDefault();
-      const nama = encodeURIComponent(document.getElementById("regNama").value);
-      const nim = encodeURIComponent(document.getElementById("regNim").value);
-      const prodi = encodeURIComponent(document.getElementById("regProdi").value);
-      const hp = encodeURIComponent(document.getElementById("regHp").value);
-      const email = encodeURIComponent(document.getElementById("regEmail").value);
-      const user = encodeURIComponent(document.getElementById("regUsername").value);
-      const pass = encodeURIComponent(document.getElementById("regPassword").value);
+    // LOAD DATA PEMINJAMAN
+    async function loadBookings() {
+      const tbody = document.getElementById('bookingsTableBody');
+      try {
+        const res = await apiRequest('getBookings');
+        if (res.status === 'success') {
+          tbody.innerHTML = '';
+          if (res.data.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="8" class="text-center">Belum ada riwayat peminjaman.</td></tr>';
+            return;
+          }
 
-      removeOldScript("jsonpRegister");
-      const script = document.createElement("script");
-      script.id = "jsonpRegister";
-      script.src = `${API_URL}?action=registerUser&nama=${nama}&nim=${nim}&prodi=${prodi}&hp=${hp}&email=${email}&username=${user}&password=${pass}&callback=handleRegisterResponse`;
-      document.body.appendChild(script);
+          res.data.forEach(item => {
+            let badgeClass = 'bg-warning text-dark';
+            if (item.status === 'Disetujui') badgeClass = 'bg-success';
+            if (item.status === 'Ditolak') badgeClass = 'bg-danger';
+
+            tbody.innerHTML += `
+              <tr>
+                <td>${item.waktuInput}</td>
+                <td><strong>${item.roomCode}</strong></td>
+                <td>${item.pemohon}</td>
+                <td>${item.nim}</td>
+                <td>${item.tanggal}</td>
+                <td>${item.jam}</td>
+                <td>${item.keperluan}</td>
+                <td><span class="badge ${badgeClass}">${item.status}</span></td>
+              </tr>
+            `;
+          });
+        }
+      } catch (err) {
+        tbody.innerHTML = `<tr><td colspan="8" class="text-center text-danger">Gagal memuat peminjaman: ${err.message}</td></tr>`;
+      }
     }
-    function handleRegisterResponse(res) {
-      alert(res.message);
-      if(res.status === "success") switchAuthMode('login');
+
+    // LOGOUT
+    function logout() {
+      currentUser = null;
+      document.getElementById('authSection').classList.remove('hidden');
+      document.getElementById('mainDashboard').classList.add('hidden');
+      document.getElementById('userGreeting').classList.add('hidden');
+      document.getElementById('btnLogout').classList.add('hidden');
+      document.getElementById('formLogin').reset();
+      switchAuthTab('login');
+      showAlert('Anda berhasil keluar.', 'info');
     }
-    function logoutUser() { currentUser = null; location.reload(); }
-    function removeOldScript(id) { const s = document.getElementById(id); if (s) s.remove(); }
   </script>
 </body>
 </html>
