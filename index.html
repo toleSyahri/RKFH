@@ -65,7 +65,7 @@
           <h2 class="text-xl font-bold text-amber-400 flex items-center gap-2">
             <i class="fas fa-sliders-h"></i> Panel Kontrol Administrator
           </h2>
-          <p class="text-xs text-slate-400">Kelola master data ruangan dan kelola persetujuan pengajuan peminjaman</p>
+          <p class="text-xs text-slate-400">Kelola master data ruangan, user terdaftar, dan persetujuan pengajuan</p>
         </div>
         <div class="flex flex-wrap gap-2">
           <!-- ⚡ TOMBOL INSTRUKSI KOMANDAN / VIP -->
@@ -75,6 +75,9 @@
           <button onclick="switchAdminTab('manageRooms')" id="adminTabRoomsBtn" class="bg-slate-800 border border-slate-700 text-white text-xs px-3.5 py-2 rounded-lg font-bold shadow hover:bg-slate-700 transition">
             <i class="fas fa-edit mr-1"></i> Kelola Ruangan
           </button>
+          <button onclick="switchAdminTab('manageUsers')" id="adminTabUsersBtn" class="bg-slate-800 border border-slate-700 text-white text-xs px-3.5 py-2 rounded-lg font-bold hover:bg-slate-700 transition">
+            <i class="fas fa-users mr-1"></i> Kelola User (<span id="adminTotalUsersBadge">0</span>)
+          </button>
           <button onclick="switchAdminTab('manageBookings')" id="adminTabBookingsBtn" class="bg-slate-800 border border-slate-700 text-white text-xs px-3.5 py-2 rounded-lg font-bold hover:bg-slate-700 transition">
             <i class="fas fa-tasks mr-1"></i> Kelola Pengajuan (<span id="adminPendingBadge">0</span>)
           </button>
@@ -82,13 +85,17 @@
       </div>
 
       <!-- Admin Stats Cards -->
-      <div class="grid grid-cols-2 md:grid-cols-4 gap-3 text-slate-900 pt-2">
+      <div class="grid grid-cols-2 md:grid-cols-5 gap-3 text-slate-900 pt-2">
         <div class="bg-slate-800 text-white p-3 rounded-xl border border-slate-700">
           <p class="text-xs text-slate-400">Total Ruangan</p>
           <h3 id="statTotalRooms" class="text-xl font-bold text-amber-400">0</h3>
         </div>
         <div class="bg-slate-800 text-white p-3 rounded-xl border border-slate-700">
-          <p class="text-xs text-slate-400">Menunggu Persetujuan</p>
+          <p class="text-xs text-slate-400">Total User</p>
+          <h3 id="statTotalUsers" class="text-xl font-bold text-sky-400">0</h3>
+        </div>
+        <div class="bg-slate-800 text-white p-3 rounded-xl border border-slate-700">
+          <p class="text-xs text-slate-400">Menunggu ACC</p>
           <h3 id="statPending" class="text-xl font-bold text-amber-500">0</h3>
         </div>
         <div class="bg-slate-800 text-white p-3 rounded-xl border border-slate-700">
@@ -152,7 +159,48 @@
       </div>
     </div>
 
-    <!-- VIEW 2: CEK STATUS & KELOLA PENGAJUAN -->
+    <!-- VIEW 2: KELOLA USER (ADMIN ONLY) -->
+    <div id="viewUsers" class="hidden">
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+        <div>
+          <h2 class="text-2xl font-bold text-slate-900">Kelola Pengguna Terdaftar</h2>
+          <p class="text-slate-500 text-sm">Daftar pengguna (Mahasiswa/Dosen/Tendik) yang memiliki akun sistem</p>
+        </div>
+        <div class="flex items-center gap-2">
+          <input type="text" id="searchUserInput" onkeyup="filterUsers()" placeholder="Cari Nama / NIM / Username..." class="px-4 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none w-64 shadow-sm">
+          <button onclick="loadUsers()" class="bg-blue-900 text-white p-2.5 rounded-lg hover:bg-blue-800 transition"><i class="fas fa-sync-alt"></i></button>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-xl shadow-md border border-slate-200 overflow-hidden">
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm text-left text-slate-600">
+            <thead class="bg-slate-100 text-slate-700 uppercase text-xs font-semibold tracking-wider border-b">
+              <tr>
+                <th class="py-3.5 px-4">Waktu Daftar</th>
+                <th class="py-3.5 px-4">Nama Lengkap</th>
+                <th class="py-3.5 px-4">NIM / NIP</th>
+                <th class="py-3.5 px-4">Prodi / Unit</th>
+                <th class="py-3.5 px-4">WhatsApp</th>
+                <th class="py-3.5 px-4">Email</th>
+                <th class="py-3.5 px-4">Username</th>
+                <th class="py-3.5 px-4 text-center">Aksi Admin</th>
+              </tr>
+            </thead>
+            <tbody id="userTableBody" class="divide-y divide-slate-200">
+              <tr>
+                <td colspan="8" class="text-center py-8 text-slate-400">
+                  <i class="fas fa-circle-notch fa-spin fa-2x text-blue-600 mb-2"></i>
+                  <p>Memuat data pengguna...</p>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- VIEW 3: CEK STATUS & KELOLA PENGAJUAN -->
     <div id="viewStatus" class="hidden">
       <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
         <div>
@@ -510,6 +558,7 @@
     const SECRET_ADMIN_PIN = "b1sm1ll4h1713"; 
 
     let rawRoomsData = [];
+    let rawUsersData = [];
     let rawBookingsData = [];
     let isAdminMode = false;
     let currentUser = null;
@@ -524,6 +573,8 @@
       const btnRooms = document.getElementById("tabRoomsBtn");
       const btnStatus = document.getElementById("tabStatusBtn");
       
+      document.getElementById("viewUsers").classList.add("hidden");
+
       if(tab === 'rooms') {
         document.getElementById("viewRooms").classList.remove("hidden");
         document.getElementById("viewStatus").classList.add("hidden");
@@ -583,6 +634,7 @@
       
       switchAdminTab('manageRooms');
       renderRoomsTable(rawRoomsData);
+      loadUsers();
       loadBookings();
     }
 
@@ -600,14 +652,93 @@
     }
 
     function switchAdminTab(adminTab) {
+      document.getElementById("viewRooms").classList.add("hidden");
+      document.getElementById("viewUsers").classList.add("hidden");
+      document.getElementById("viewStatus").classList.add("hidden");
+
       if(adminTab === 'manageRooms') {
         document.getElementById("viewRooms").classList.remove("hidden");
-        document.getElementById("viewStatus").classList.add("hidden");
+      } else if(adminTab === 'manageUsers') {
+        document.getElementById("viewUsers").classList.remove("hidden");
+        loadUsers();
       } else {
-        document.getElementById("viewRooms").classList.add("hidden");
         document.getElementById("viewStatus").classList.remove("hidden");
         loadBookings();
       }
+    }
+
+    // --- KELOLA USER (LOAD, RENDER, DELETE) ---
+    function loadUsers() {
+      removeOldScript("jsonpGetUsers");
+      const script = document.createElement("script");
+      script.id = "jsonpGetUsers";
+      script.src = `${API_URL}?action=getUsers&callback=handleUsersResponse`;
+      document.body.appendChild(script);
+    }
+
+    function handleUsersResponse(res) {
+      if(res.status === "success") {
+        rawUsersData = res.data;
+        document.getElementById("statTotalUsers").innerText = rawUsersData.length;
+        document.getElementById("adminTotalUsersBadge").innerText = rawUsersData.length;
+        renderUsersTable(rawUsersData);
+      }
+    }
+
+    function renderUsersTable(data) {
+      const tbody = document.getElementById("userTableBody");
+      tbody.innerHTML = "";
+
+      if(!data || data.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="8" class="text-center py-6 text-slate-400">Belum ada user terdaftar.</td></tr>`;
+        return;
+      }
+
+      data.forEach(u => {
+        const tr = document.createElement("tr");
+        tr.className = "hover:bg-slate-50 transition border-b";
+
+        tr.innerHTML = `
+          <td class="py-3 px-4 text-xs text-slate-400">${u.waktuDaftar || '-'}</td>
+          <td class="py-3 px-4 font-bold text-slate-800">${u.nama}</td>
+          <td class="py-3 px-4 text-xs font-semibold text-slate-600">${u.nim}</td>
+          <td class="py-3 px-4 text-xs">${u.prodi}</td>
+          <td class="py-3 px-4 text-xs"><a href="https://wa.me/${u.hp}" target="_blank" class="text-emerald-600 font-bold hover:underline"><i class="fab fa-whatsapp"></i> ${u.hp}</a></td>
+          <td class="py-3 px-4 text-xs text-slate-500">${u.email}</td>
+          <td class="py-3 px-4 text-xs font-mono text-blue-700 font-bold">${u.username}</td>
+          <td class="py-3 px-4 text-center">
+            <button onclick="deleteUser(${u.rowIndex}, '${u.nama}')" class="bg-rose-600 hover:bg-rose-700 text-white text-xs px-2.5 py-1 rounded shadow" title="Hapus User">
+              <i class="fas fa-user-slash mr-1"></i> Hapus
+            </button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function deleteUser(rowIndex, nama) {
+      if(!confirm(`Yakin ingin menghapus akun user "${nama}"? User ini tidak akan bisa login lagi.`)) return;
+
+      removeOldScript("jsonpDeleteUser");
+      const script = document.createElement("script");
+      script.id = "jsonpDeleteUser";
+      script.src = `${API_URL}?action=deleteUser&rowIndex=${rowIndex}&callback=handleDeleteUserResponse`;
+      document.body.appendChild(script);
+    }
+
+    function handleDeleteUserResponse(res) {
+      alert(res.message);
+      if(res.status === "success") loadUsers();
+    }
+
+    function filterUsers() {
+      const q = document.getElementById("searchUserInput").value.toLowerCase();
+      const filtered = rawUsersData.filter(u => 
+        String(u.nama).toLowerCase().includes(q) || 
+        String(u.nim).toLowerCase().includes(q) ||
+        String(u.username).toLowerCase().includes(q)
+      );
+      renderUsersTable(filtered);
     }
 
     // --- RUANGAN (LOAD & RENDER) ---
