@@ -9,31 +9,12 @@
     <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        body {
-            background-color: #f4f6f9;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-        .navbar-custom {
-            background-color: #0d233a;
-        }
-        .hero-header {
-            background: linear-gradient(135deg, #0d233a 0%, #1e3a5f 100%);
-            color: white;
-            padding: 35px 0 25px;
-            margin-bottom: 25px;
-        }
-        .stat-card {
-            border: none;
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-        }
-        .table-container {
-            background: white;
-            padding: 25px;
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-            margin-bottom: 25px;
-        }
+        body { background-color: #f4f6f9; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .navbar-custom { background-color: #0d233a; }
+        .hero-header { background: linear-gradient(135deg, #0d233a 0%, #1e3a5f 100%); color: white; padding: 30px 0 20px; margin-bottom: 25px; }
+        .stat-card { border: none; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        .table-container { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); margin-bottom: 25px; }
+        .user-active-badge { background-color: #198754; color: white; padding: 4px 12px; border-radius: 20px; font-size: 0.85rem; }
     </style>
 </head>
 <body>
@@ -44,10 +25,16 @@
             <a class="navbar-brand fw-bold" href="#">
                 <i class="fa-solid fa-building-columns me-2"></i>SIM-RUANG FH UNESA
             </a>
-            <div class="d-flex align-items-center gap-2">
-                <button class="btn btn-outline-light btn-sm" data-bs-toggle="modal" data-bs-target="#authModal">
-                    <i class="fa-solid fa-user me-1"></i> Login / Daftar Pemohon
+            <div class="d-flex align-items-center gap-2" id="navAuthArea">
+                <!-- Status Login Pemohon / Tombol Login -->
+                <button class="btn btn-outline-light btn-sm" id="btnUserLogin" data-bs-toggle="modal" data-bs-target="#userAuthModal">
+                    <i class="fa-solid fa-user-plus me-1"></i> Daftar / Login Pemohon
                 </button>
+                <div id="userLoggedInInfo" class="d-none text-white me-2">
+                    <span class="user-active-badge me-1"><i class="fa-solid fa-user-check me-1"></i><span id="displayName">Pemohon</span></span>
+                    <button class="btn btn-xs btn-outline-warning text-white" onclick="logoutUser()" title="Keluar"><i class="fa-solid fa-power-off"></i></button>
+                </div>
+                <!-- Tombol Mode Admin -->
                 <button class="btn btn-warning btn-sm fw-bold" id="btnAdminToggle" onclick="openAdminLoginModal()">
                     <i class="fa-solid fa-user-shield me-1"></i> Mode Admin
                 </button>
@@ -83,14 +70,14 @@
             <div class="col-md-4">
                 <div class="card stat-card text-center p-3">
                     <div class="fs-1 text-primary"><i class="fa-solid fa-door-open"></i></div>
-                    <h3 class="fw-bold mb-0">19</h3>
+                    <h3 class="fw-bold mb-0" id="totalRuanganCount">17</h3>
                     <small class="text-muted">Total Ruangan</small>
                 </div>
             </div>
             <div class="col-md-4">
                 <div class="card stat-card text-center p-3">
                     <div class="fs-1 text-info"><i class="fa-solid fa-snowflake"></i></div>
-                    <h3 class="fw-bold mb-0">33</h3>
+                    <h3 class="fw-bold mb-0" id="totalAcCount">26</h3>
                     <small class="text-muted">Unit AC Beroperasi</small>
                 </div>
             </div>
@@ -103,7 +90,7 @@
             </div>
         </div>
 
-        <!-- Tabel Daftar Ruangan & Kebijakan Pimpinan -->
+        <!-- Tabel Daftar Ruangan -->
         <div class="table-container">
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <h5 class="fw-bold mb-0"><i class="fa-solid fa-list me-2"></i>Daftar Ruangan Perkuliahan</h5>
@@ -137,7 +124,7 @@
                             <th>Lantai</th>
                             <th>Kode Ruang</th>
                             <th>Peruntukan</th>
-                            <th>Kapasitas</th>
+                            <th>Kapasitas & Fasilitas</th>
                             <th>Instruksi Pimpinan</th>
                             <th>Aksi</th>
                         </tr>
@@ -147,7 +134,7 @@
             </div>
         </div>
 
-        <!-- Tabel Status Pengajuan -->
+        <!-- Tabel Status Pengajuan & Laman ACC Admin -->
         <div class="table-container">
             <h5 class="fw-bold mb-3"><i class="fa-solid fa-clock-history me-2"></i>Status Pengajuan Ruangan Terbaru</h5>
             <div class="table-responsive">
@@ -161,12 +148,13 @@
                             <th>Keperluan</th>
                             <th>Berkas ID</th>
                             <th>Status Persetujuan</th>
+                            <th id="thAdminAction" class="d-none text-center">Aksi Admin (Persetujuan)</th>
                         </tr>
                     </thead>
                     <tbody id="bookingHistoryList">
                         <tr>
-                            <td colspan="7" class="text-center py-3 text-muted">
-                                <i class="fa-solid fa-spinner fa-spin me-2"></i>Memuat data...
+                            <td colspan="8" class="text-center py-3 text-muted">
+                                <i class="fa-solid fa-spinner fa-spin me-2"></i>Memuat data pengajuan...
                             </td>
                         </tr>
                     </tbody>
@@ -176,28 +164,65 @@
 
     </div>
 
-    <!-- Modal Form Pengajuan Ruangan -->
-    <div class="modal fade" id="bookingModal" tabindex="-1" aria-hidden="true">
+    <!-- MODAL 1: REGISTRASI & LOGIN PEMOHON (Satu Kali Pendaftaran Identitas) -->
+    <div class="modal fade" id="userAuthModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header bg-primary text-white">
-                    <h5 class="modal-title fw-bold"><i class="fa-solid fa-pen-to-square me-2"></i>Form Pengajuan Ruang</h5>
+                    <h5 class="modal-title fw-bold"><i class="fa-solid fa-user-shield me-2"></i>Registrasi Identitas Pemohon</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <form id="userRegisterForm" onsubmit="handleUserRegistration(event)">
+                    <div class="modal-body">
+                        <div class="alert alert-info small mb-3">
+                            <i class="fa-solid fa-circle-info me-1"></i> Registrasi ini sebagai langkah **pengamanan tanggung jawab pengguna** sebelum melakukan pengajuan ruangan.
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Nama Lengkap</label>
+                            <input type="text" id="regName" class="form-control" placeholder="Contoh: Ahmad Subagyo" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">NIM / NIP / NIDN</label>
+                            <input type="text" id="regIdNumber" class="form-control" placeholder="Nomor Induk Mahasiswa / Pegawai" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">No. WhatsApp</label>
+                            <input type="tel" id="regPhone" class="form-control" placeholder="08123456789" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Upload Identitas Resmi (KTP / SIM / KTM) <span class="text-danger">*Wajib</span></label>
+                            <input type="file" id="regIdCard" class="form-control" accept="image/*,.pdf" required>
+                            <small class="text-muted">Format: Foto JPG/PNG atau PDF (Maks. 5MB)</small>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                        <button type="submit" id="btnRegisterSubmit" class="btn btn-success fw-bold">
+                            <i class="fa-solid fa-check-circle me-1"></i> Simpan & Aktifkan Akun
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 2: FORM PENGAJUAN RUANG (Hanya muncul jika pemohon sudah login) -->
+    <div class="modal fade" id="bookingModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title fw-bold"><i class="fa-solid fa-paper-plane me-2"></i>Pengajuan Pinjam Ruang</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <form id="bookingForm" onsubmit="handleBookingSubmit(event)">
                     <div class="modal-body">
                         <div class="mb-3">
                             <label class="form-label fw-bold">Kode Ruang</label>
-                            <input type="text" id="modalRoomCode" class="form-control" readonly required>
+                            <input type="text" id="modalRoomCode" class="form-control fw-bold bg-light" readonly required>
                         </div>
                         <div class="mb-3">
-                            <label class="form-label fw-bold">Nama Pemohon & WhatsApp</label>
-                            <input type="text" id="applicantIdentity" class="form-control" placeholder="Contoh: Ahmad Subagyo (08123456789)" required>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">Upload Identitas (KTP / SIM / KTM) <span class="text-danger">*Wajib</span></label>
-                            <input type="file" id="applicantIdCard" class="form-control" accept="image/*,.pdf" required>
-                            <small class="text-muted">Format: JPG, PNG, atau PDF (Maks. 5MB)</small>
+                            <label class="form-label fw-bold">Pemohon (Tervalidasi)</label>
+                            <input type="text" id="modalApplicantName" class="form-control bg-light" readonly required>
                         </div>
                         <div class="mb-3">
                             <label class="form-label fw-bold">Tanggal Penggunaan</label>
@@ -208,13 +233,13 @@
                             <input type="text" id="useTimeSlot" class="form-control" placeholder="Contoh: 08:00 - 12:00 WIB" required>
                         </div>
                         <div class="mb-3">
-                            <label class="form-label fw-bold">Keperluan / Agenda</label>
-                            <textarea id="usePurpose" class="form-control" rows="3" required></textarea>
+                            <label class="form-label fw-bold">Keperluan / Agenda Kegiatan</label>
+                            <textarea id="usePurpose" class="form-control" rows="3" placeholder="Deskripsikan agenda kegiatan..." required></textarea>
                         </div>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                        <button type="submit" id="btnSubmitForm" class="btn btn-success">
+                        <button type="submit" id="btnSubmitForm" class="btn btn-success fw-bold">
                             <i class="fa-solid fa-paper-plane me-1"></i> Kirim Pengajuan
                         </button>
                     </div>
@@ -223,7 +248,7 @@
         </div>
     </div>
 
-    <!-- Modal Login Admin -->
+    <!-- MODAL 3: LOGIN ADMIN -->
     <div class="modal fade" id="adminModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-sm">
             <div class="modal-content">
@@ -233,7 +258,7 @@
                 </div>
                 <div class="modal-body">
                     <div class="mb-3">
-                        <label class="form-label fw-bold">PIN Mode Admin</label>
+                        <label class="form-label fw-bold">Masukkan PIN Admin</label>
                         <input type="password" id="adminPinInput" class="form-control text-center fs-4" placeholder="••••" maxlength="6">
                     </div>
                     <button type="button" class="btn btn-danger w-100 fw-bold" onclick="verifyAdminPIN()">
@@ -244,57 +269,46 @@
         </div>
     </div>
 
-    <!-- Modal Edit Kebijakan Pimpinan -->
-    <div class="modal fade" id="editNoteModal" tabindex="-1" aria-hidden="true">
+    <!-- MODAL 4: EDIT RUANGAN LENGKAP (MODE ADMIN) -->
+    <div class="modal fade" id="editRoomModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header bg-warning">
-                    <h5 class="modal-title fw-bold"><i class="fa-solid fa-pen-nib me-2"></i>Edit Kebijakan Pimpinan</h5>
+                    <h5 class="modal-title fw-bold"><i class="fa-solid fa-sliders me-2"></i>Edit Detail & Kebijakan Ruang</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
                     <input type="hidden" id="editRoomIndex">
                     <div class="mb-3">
                         <label class="form-label fw-bold">Kode Ruangan</label>
-                        <input type="text" id="editRoomCode" class="form-control" readonly>
+                        <input type="text" id="editRoomCode" class="form-control" required>
+                    </div>
+                    <div class="row g-2 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Peruntukan</label>
+                            <select id="editRoomProgram" class="form-select">
+                                <option value="S1">S1</option>
+                                <option value="S2">S2</option>
+                                <option value="Umum">Umum</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label fw-bold">Kursi</label>
+                            <input type="number" id="editRoomKursi" class="form-control">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label fw-bold">Unit AC</label>
+                            <input type="number" id="editRoomAc" class="form-control">
+                        </div>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label fw-bold">Instruksi Pimpinan Baru</label>
-                        <input type="text" id="editRoomNote" class="form-control">
+                        <label class="form-label fw-bold text-danger">Instruksi / Kebijakan Pimpinan</label>
+                        <textarea id="editRoomNote" class="form-control" rows="3" placeholder="Contoh: Prioritas Rapat Dekanat / Seminar Hasil"></textarea>
                     </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                    <button type="button" class="btn btn-success" onclick="saveRoomNote()">Simpan</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal Login/Daftar Pemohon -->
-    <div class="modal fade" id="authModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header bg-primary text-white">
-                    <h5 class="modal-title fw-bold"><i class="fa-solid fa-user-check me-2"></i>Akses Pemohon</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <form onsubmit="event.preventDefault(); alert('Akun Pemohon berhasil diaktifkan!'); bootstrap.Modal.getInstance(document.getElementById('authModal')).hide();">
-                        <div class="mb-3">
-                            <label class="form-label">Nama Lengkap</label>
-                            <input type="text" class="form-control" required>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">NIM / NIP / Identity ID</label>
-                            <input type="text" class="form-control" required>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Nomor WhatsApp</label>
-                            <input type="tel" class="form-control" required>
-                        </div>
-                        <button type="submit" class="btn btn-success w-100 fw-bold">Login / Daftar</button>
-                    </form>
+                    <button type="button" class="btn btn-success fw-bold" onclick="saveFullRoomData()">Simpan Perubahan</button>
                 </div>
             </div>
         </div>
@@ -306,6 +320,7 @@
         const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxLgC4abF3K7MNH-UXWgMn5YhR5cA_yi9Ngp2b1OS-BxDVfeu2jDVrDtMRkrVpnj1Aj/exec";
         const ADMIN_PIN = "1234";
         let isAdmin = false;
+        let currentUser = JSON.parse(localStorage.getItem("unesa_user")) || null;
 
         let initialRooms = JSON.parse(localStorage.getItem('unesa_rooms')) || [
             { no: 1, lantai: "1", code: "F4.01.06", program: "S1", kursi: 40, ac: 1, note: "-" },
@@ -328,18 +343,126 @@
         ];
 
         document.addEventListener("DOMContentLoaded", () => {
+            updateUserUI();
             renderRoomsTable(initialRooms);
             loadDataFromSheets();
         });
 
+        // UPDATE TAMPILAN USER (PEMOHON)
+        function updateUserUI() {
+            if (currentUser) {
+                document.getElementById("btnUserLogin").classList.add("d-none");
+                document.getElementById("userLoggedInInfo").classList.remove("d-none");
+                document.getElementById("displayName").innerText = currentUser.name;
+            } else {
+                document.getElementById("btnUserLogin").classList.remove("d-none");
+                document.getElementById("userLoggedInInfo").classList.add("d-none");
+            }
+        }
+
+        // AKSI REGISTRASI / CREATION AKUN PEMOHON
+        function handleUserRegistration(e) {
+            e.preventDefault();
+            const fileInput = document.getElementById("regIdCard");
+            
+            if (!fileInput.files.length) {
+                alert("Wajib mengunggah berkas KTP / SIM / KTM!");
+                return;
+            }
+
+            const file = fileInput.files[0];
+            const reader = new FileReader();
+
+            reader.onload = function() {
+                currentUser = {
+                    name: document.getElementById("regName").value,
+                    idNumber: document.getElementById("regIdNumber").value,
+                    phone: document.getElementById("regPhone").value,
+                    fileData: reader.result.split(',')[1],
+                    fileName: file.name,
+                    fileMime: file.type
+                };
+
+                localStorage.setItem("unesa_user", JSON.stringify(currentUser));
+                updateUserUI();
+                bootstrap.Modal.getInstance(document.getElementById("userAuthModal")).hide();
+                alert("Registrasi Berhasil! Akun Anda siap digunakan untuk pengajuan ruangan.");
+            };
+
+            reader.readAsDataURL(file);
+        }
+
+        function logoutUser() {
+            if (confirm("Apakah Anda yakin ingin logout pemohon?")) {
+                currentUser = null;
+                localStorage.removeItem("unesa_user");
+                updateUserUI();
+            }
+        }
+
+        // AKSI TOMBOL AJUKAN DI TABEL RUANGAN
+        function openBookingModal(roomCode) {
+            if (!currentUser) {
+                alert("Mohon lakukan Registrasi / Login Pemohon terlebih dahulu!");
+                new bootstrap.Modal(document.getElementById("userAuthModal")).show();
+                return;
+            }
+
+            document.getElementById("modalRoomCode").value = roomCode;
+            document.getElementById("modalApplicantName").value = `${currentUser.name} (${currentUser.idNumber} / ${currentUser.phone})`;
+            new bootstrap.Modal(document.getElementById("bookingModal")).show();
+        }
+
+        // KIRIM FORM PENGAJUAN
+        async function handleBookingSubmit(e) {
+            e.preventDefault();
+            const btnSubmit = document.getElementById("btnSubmitForm");
+            btnSubmit.disabled = true;
+            btnSubmit.innerHTML = `<i class="fa-solid fa-spinner fa-spin me-1"></i> Mengirim...`;
+
+            const payload = {
+                timestamp: new Date().toLocaleString('id-ID'),
+                room: document.getElementById("modalRoomCode").value,
+                name: `${currentUser.name} (${currentUser.idNumber} - WA: ${currentUser.phone})`,
+                date: document.getElementById("useDate").value,
+                timeSlot: document.getElementById("useTimeSlot").value,
+                purpose: document.getElementById("usePurpose").value,
+                fileName: currentUser.fileName,
+                fileMime: currentUser.fileMime,
+                fileData: currentUser.fileData
+            };
+
+            try {
+                await fetch(GOOGLE_SCRIPT_URL, {
+                    method: "POST",
+                    mode: "no-cors",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payload)
+                });
+
+                alert("Pengajuan berhasil dikirim! Silakan pantau status persetujuan di tabel bawah.");
+                document.getElementById("bookingForm").reset();
+                bootstrap.Modal.getInstance(document.getElementById("bookingModal")).hide();
+                setTimeout(loadDataFromSheets, 2000);
+            } catch (err) {
+                alert("Gagal mengirim pengajuan.");
+            } finally {
+                btnSubmit.disabled = false;
+                btnSubmit.innerHTML = `<i class="fa-solid fa-paper-plane me-1"></i> Kirim Pengajuan`;
+            }
+        }
+
+        // FITUR MODE ADMIN
         function openAdminLoginModal() {
             if (isAdmin) {
                 isAdmin = false;
                 document.getElementById("adminBadgeStatus").classList.add("d-none");
+                document.getElementById("thAdminAction").classList.add("d-none");
                 document.getElementById("btnAdminToggle").className = "btn btn-warning btn-sm fw-bold";
                 document.getElementById("btnAdminToggle").innerHTML = `<i class="fa-solid fa-user-shield me-1"></i> Mode Admin`;
                 renderRoomsTable(initialRooms);
-                alert("Mode Admin ditutup.");
+                loadDataFromSheets();
+                alert("Mode Admin Ditutup.");
             } else {
                 new bootstrap.Modal(document.getElementById("adminModal")).show();
             }
@@ -352,13 +475,15 @@
                 bootstrap.Modal.getInstance(document.getElementById("adminModal")).hide();
                 document.getElementById("adminPinInput").value = "";
                 document.getElementById("adminBadgeStatus").classList.remove("d-none");
+                document.getElementById("thAdminAction").classList.remove("d-none");
                 
                 const btnToggle = document.getElementById("btnAdminToggle");
                 btnToggle.className = "btn btn-danger btn-sm fw-bold";
                 btnToggle.innerHTML = `<i class="fa-solid fa-right-from-bracket me-1"></i> Keluar Admin`;
                 
                 renderRoomsTable(initialRooms);
-                alert("Login Admin Berhasil!");
+                loadDataFromSheets();
+                alert("Login Admin Berhasil! Tombol Persetujuan (ACC / Tolak) dan Edit Ruangan Aktif.");
             } else {
                 alert("PIN Admin Salah!");
             }
@@ -367,10 +492,13 @@
         function renderRoomsTable(rooms) {
             const tbody = document.getElementById("roomTableBody");
             tbody.innerHTML = "";
+            let totalAc = 0;
+
             rooms.forEach((room, index) => {
+                totalAc += parseInt(room.ac || 0);
                 const tr = document.createElement("tr");
                 let adminAction = isAdmin ? 
-                    `<button class="btn btn-sm btn-outline-warning text-dark ms-1" onclick="openEditNoteModal(${index})"><i class="fa-solid fa-pen"></i></button>` : '';
+                    `<button class="btn btn-sm btn-outline-warning text-dark ms-1" onclick="openEditRoomModal(${index})" title="Edit Detail Ruang"><i class="fa-solid fa-pen-to-square"></i> Edit</button>` : '';
 
                 tr.innerHTML = `
                     <td>${room.no}</td>
@@ -378,90 +506,44 @@
                     <td class="fw-bold">${room.code}</td>
                     <td><span class="badge bg-info text-dark">${room.program}</span></td>
                     <td>${room.kursi} Kursi | ${room.ac} AC</td>
-                    <td class="small text-danger fw-semibold">${room.note} ${adminAction}</td>
+                    <td class="small text-danger fw-semibold">${room.note}</td>
                     <td>
                         <button class="btn btn-sm btn-outline-primary" onclick="openBookingModal('${room.code}')">
                             <i class="fa-regular fa-calendar-plus me-1"></i> Ajukan
                         </button>
+                        ${adminAction}
                     </td>
                 `;
                 tbody.appendChild(tr);
             });
+
+            document.getElementById("totalRuanganCount").innerText = rooms.length;
+            document.getElementById("totalAcCount").innerText = totalAc;
         }
 
-        function openEditNoteModal(index) {
+        function openEditRoomModal(index) {
+            const room = initialRooms[index];
             document.getElementById("editRoomIndex").value = index;
-            document.getElementById("editRoomCode").value = initialRooms[index].code;
-            document.getElementById("editRoomNote").value = initialRooms[index].note;
-            new bootstrap.Modal(document.getElementById("editNoteModal")).show();
+            document.getElementById("editRoomCode").value = room.code;
+            document.getElementById("editRoomProgram").value = room.program;
+            document.getElementById("editRoomKursi").value = room.kursi;
+            document.getElementById("editRoomAc").value = room.ac;
+            document.getElementById("editRoomNote").value = room.note;
+            new bootstrap.Modal(document.getElementById("editRoomModal")).show();
         }
 
-        function saveRoomNote() {
+        function saveFullRoomData() {
             const index = document.getElementById("editRoomIndex").value;
+            initialRooms[index].code = document.getElementById("editRoomCode").value;
+            initialRooms[index].program = document.getElementById("editRoomProgram").value;
+            initialRooms[index].kursi = document.getElementById("editRoomKursi").value;
+            initialRooms[index].ac = document.getElementById("editRoomAc").value;
             initialRooms[index].note = document.getElementById("editRoomNote").value || "-";
+
             localStorage.setItem('unesa_rooms', JSON.stringify(initialRooms));
             renderRoomsTable(initialRooms);
-            bootstrap.Modal.getInstance(document.getElementById("editNoteModal")).hide();
-        }
-
-        function openBookingModal(roomCode) {
-            document.getElementById("modalRoomCode").value = roomCode;
-            new bootstrap.Modal(document.getElementById("bookingModal")).show();
-        }
-
-        // Pengiriman Form Termasuk File KTP/SIM/KTM
-        async function handleBookingSubmit(e) {
-            e.preventDefault();
-            const btnSubmit = document.getElementById("btnSubmitForm");
-            const fileInput = document.getElementById("applicantIdCard");
-            
-            if (!fileInput.files.length) {
-                alert("Wajib melampirkan berkas KTP / SIM / KTM!");
-                return;
-            }
-
-            btnSubmit.disabled = true;
-            btnSubmit.innerHTML = `<i class="fa-solid fa-spinner fa-spin me-1"></i> Mengunggah...`;
-
-            const file = fileInput.files[0];
-            const reader = new FileReader();
-
-            reader.onload = async function() {
-                const base64Data = reader.result.split(',')[1];
-                
-                const payload = {
-                    timestamp: new Date().toLocaleString('id-ID'),
-                    room: document.getElementById("modalRoomCode").value,
-                    name: document.getElementById("applicantIdentity").value,
-                    date: document.getElementById("useDate").value,
-                    timeSlot: document.getElementById("useTimeSlot").value,
-                    purpose: document.getElementById("usePurpose").value,
-                    fileName: file.name,
-                    fileMime: file.type,
-                    fileData: base64Data
-                };
-
-                try {
-                    await fetch(GOOGLE_SCRIPT_URL, {
-                        method: "POST",
-                        mode: "no-cors",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify(payload)
-                    });
-
-                    alert("Pengajuan dan berkas identitas berhasil dikirim!");
-                    document.getElementById("bookingForm").reset();
-                    bootstrap.Modal.getInstance(document.getElementById("bookingModal")).hide();
-                    setTimeout(loadDataFromSheets, 2000);
-                } catch (err) {
-                    alert("Gagal mengirim pengajuan.");
-                } finally {
-                    btnSubmit.disabled = false;
-                    btnSubmit.innerHTML = `<i class="fa-solid fa-paper-plane me-1"></i> Kirim Pengajuan`;
-                }
-            };
-
-            reader.readAsDataURL(file);
+            bootstrap.Modal.getInstance(document.getElementById("editRoomModal")).hide();
+            alert("Detail & Kebijakan Ruang Berhasil Diperbarui!");
         }
 
         async function loadDataFromSheets() {
@@ -484,7 +566,19 @@
                             statusBadge = `<span class="badge bg-danger"><i class="fa-solid fa-circle-xmark me-1"></i>Ditolak</span>`;
                         }
 
-                        let fileLink = item.fileUrl ? `<a href="${item.fileUrl}" target="_blank" class="btn btn-xs btn-outline-info"><i class="fa-solid fa-id-card"></i> Lihat ID</a>` : '<span class="text-muted">-</span>';
+                        let fileLink = item.fileUrl ? `<a href="${item.fileUrl}" target="_blank" class="btn btn-xs btn-outline-info"><i class="fa-solid fa-id-card"></i> KTP/SIM</a>` : '<span class="text-muted">-</span>';
+
+                        let adminActionBtns = "";
+                        if (isAdmin) {
+                            adminActionBtns = `
+                                <td class="text-center">
+                                    <div class="btn-group btn-group-sm">
+                                        <button class="btn btn-success fw-bold" onclick="updateStatusByAdmin(${item.rowIndex}, 'Disetujui')" title="Setujui (ACC)"><i class="fa-solid fa-check me-1"></i> ACC</button>
+                                        <button class="btn btn-danger fw-bold" onclick="updateStatusByAdmin(${item.rowIndex}, 'Ditolak')" title="Tolak"><i class="fa-solid fa-xmark me-1"></i> Tolak</button>
+                                    </div>
+                                </td>
+                            `;
+                        }
 
                         const tr = document.createElement("tr");
                         tr.innerHTML = `
@@ -495,12 +589,35 @@
                             <td>${item.purpose}</td>
                             <td>${fileLink}</td>
                             <td>${statusBadge}</td>
+                            ${adminActionBtns}
                         `;
                         historyBody.appendChild(tr);
                     });
                 }
             } catch (error) {
                 console.error(error);
+            }
+        }
+
+        async function updateStatusByAdmin(rowIndex, newStatus) {
+            if (!confirm(`Apakah Anda yakin ingin me-status pengajuan ini menjadi '${newStatus}'?`)) return;
+
+            try {
+                await fetch(GOOGLE_SCRIPT_URL, {
+                    method: "POST",
+                    mode: "no-cors",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        action: "updateStatus",
+                        rowIndex: rowIndex,
+                        newStatus: newStatus
+                    })
+                });
+
+                alert(`Status berhasil diperbarui menjadi: ${newStatus}`);
+                setTimeout(loadDataFromSheets, 1500);
+            } catch (e) {
+                alert("Gagal mengubah status.");
             }
         }
 
