@@ -30,16 +30,16 @@
           <button id="refreshBtn" onclick="loadData()" class="bg-blue-800 hover:bg-blue-700 text-white text-sm px-3 py-1.5 rounded-lg transition flex items-center gap-2">
             <i class="fas fa-sync-alt"></i> Refresh Data
           </button>
-          <span id="roleBadge" class="bg-blue-700 text-xs px-2.5 py-1 rounded-full font-medium">Mode: Public</span>
+          <span class="bg-blue-700 text-xs px-2.5 py-1 rounded-full font-medium">Mode: Public</span>
         </div>
       </div>
     </div>
   </nav>
 
-  <!-- MAIN CONTENT CONTAINER -->
+  <!-- MAIN CONTENT -->
   <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-grow w-full">
     
-    <!-- HEADER STATS & ACTION -->
+    <!-- HEADER ACTION -->
     <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
       <div>
         <h2 class="text-2xl font-bold text-slate-900">Daftar Fasilitas Ruang Perkuliahan</h2>
@@ -47,7 +47,7 @@
       </div>
       <div class="flex items-center gap-2">
         <input type="text" id="searchInput" onkeyup="filterRooms()" placeholder="Cari kode/lantai/fasilitas..." class="px-4 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none w-64 shadow-sm">
-        <button id="addRoomBtn" onclick="openAddRoomModal()" class="hidden bg-emerald-600 hover:bg-emerald-700 text-white text-sm px-4 py-2 rounded-lg font-medium transition flex items-center gap-2 shadow-sm">
+        <button id="addRoomBtn" onclick="openAddRoomModal()" class="bg-emerald-600 hover:bg-emerald-700 text-white text-sm px-4 py-2 rounded-lg font-medium transition flex items-center gap-2 shadow-sm">
           <i class="fas fa-plus"></i> Tambah Ruang
         </button>
       </div>
@@ -68,15 +68,14 @@
               <th class="py-3.5 px-4 text-center">Stop Kontak</th>
               <th class="py-3.5 px-4 text-center">Papan Tulis</th>
               <th class="py-3.5 px-4">Waktu Layanan</th>
-              <th class="py-3.5 px-4 text-center actions-header">Aksi</th>
+              <th class="py-3.5 px-4 text-center">Aksi</th>
             </tr>
           </thead>
           <tbody id="roomTableBody" class="divide-y divide-slate-200">
-            <!-- Loading Indicator -->
             <tr>
               <td colspan="10" class="text-center py-8 text-slate-400">
                 <i class="fas fa-circle-notch fa-spin fa-2x text-blue-600 mb-2"></i>
-                <p>Memuat data ruangan...</p>
+                <p>Memuat data terbaru dari Google Sheets...</p>
               </td>
             </tr>
           </tbody>
@@ -90,7 +89,7 @@
     <div class="bg-white rounded-xl shadow-2xl max-w-lg w-full overflow-hidden transform transition-all">
       <div class="bg-blue-900 text-white px-6 py-4 flex items-center justify-between">
         <h3 id="modalTitle" class="font-bold text-lg">Edit Data Ruangan</h3>
-        <button onclick="closeModal()" class="text-blue-200 hover:text-white"><i class="fas fa-times text-xl"></i></button>
+        <button type="button" onclick="closeModal()" class="text-blue-200 hover:text-white"><i class="fas fa-times text-xl"></i></button>
       </div>
       <form id="roomForm" onsubmit="handleSaveRoom(event)" class="p-6 space-y-4">
         <input type="hidden" id="modalRowIndex">
@@ -158,8 +157,7 @@
     </div>
   </div>
 
-  <!-- SCRIPT INTEGRASI REALTIME -->
-  <!-- SCRIPT INTEGRASI TANPA KENDALA CORS (FAILED TO FETCH) -->
+  <!-- JAVASCRIPT KONEKSI & AKSI INTERAKTIF -->
   <script>
     const API_URL = "https://script.google.com/macros/s/AKfycbyCqv5m7HJEb4S9X3mtZOc57LJt8TVHToMt5MRboHfarvAvwxKOYKrb6NBOXVUdYNIb/exec";
     let rawRoomsData = [];
@@ -168,7 +166,7 @@
       loadData();
     });
 
-    // LOAD DATA MENGGUNAKAN JSONP (TIDAK AKAN DIBLOKIR BROWSER / CORS)
+    // 1. Ambil data dengan metode JSONP
     function loadData() {
       const tbody = document.getElementById("roomTableBody");
       tbody.innerHTML = `
@@ -179,11 +177,9 @@
           </td>
         </tr>`;
 
-      // Hapus script JSONP lama jika ada
       const oldScript = document.getElementById("jsonpScript");
       if (oldScript) oldScript.remove();
 
-      // Buat script tag baru secara dinamis
       const script = document.createElement("script");
       script.id = "jsonpScript";
       script.src = `${API_URL}?action=getRooms&callback=handleJsonResponse`;
@@ -195,7 +191,7 @@
       document.body.appendChild(script);
     }
 
-    // Fungsi Callback penampung data dari Apps Script
+    // 2. Handler penerima data JSONP
     function handleJsonResponse(result) {
       if(result.status === "success") {
         rawRoomsData = result.data;
@@ -205,7 +201,7 @@
       }
     }
 
-    // Render Data ke Tabel
+    // 3. Render data ke tabel
     function renderTable(data) {
       const tbody = document.getElementById("roomTableBody");
       tbody.innerHTML = "";
@@ -218,6 +214,9 @@
       data.forEach((room) => {
         const tr = document.createElement("tr");
         tr.className = "hover:bg-slate-50 transition border-b";
+
+        // Parsing aman data JSON untuk tombol Edit
+        const roomJson = JSON.stringify(room).replace(/'/g, "&apos;");
 
         tr.innerHTML = `
           <td class="py-3 px-4 text-center font-medium text-slate-700">${room.lantai}</td>
@@ -232,17 +231,16 @@
           <td class="py-3 px-4 text-center">${room.papanTulis}</td>
           <td class="py-3 px-4 text-xs text-slate-500">${room.waktuLayanan}</td>
           <td class="py-3 px-4 text-center">
-            <button onclick='openEditRoomModal(${JSON.stringify(room)})' class="bg-amber-500 hover:bg-amber-600 text-white text-xs px-2.5 py-1.5 rounded-md font-medium transition flex items-center gap-1 mx-auto">
+            <button onclick='openEditRoomModal(${roomJson})' class="bg-amber-500 hover:bg-amber-600 text-white text-xs px-2.5 py-1.5 rounded-md font-medium transition flex items-center gap-1 mx-auto shadow-sm">
               <i class="fas fa-edit"></i> Edit
             </button>
           </td>
         `;
         tbody.appendChild(tr);
       });
-
-      document.getElementById("addRoomBtn").classList.remove("hidden");
     }
 
+    // 4. Fitur pencarian live
     function filterRooms() {
       const query = document.getElementById("searchInput").value.toLowerCase();
       const filtered = rawRoomsData.filter(r => 
@@ -251,6 +249,87 @@
         r.program.toLowerCase().includes(query)
       );
       renderTable(filtered);
+    }
+
+    // 5. Fungsi Modal Tambah
+    function openAddRoomModal() {
+      document.getElementById("modalTitle").innerText = "Tambah Ruangan Baru";
+      document.getElementById("modalRowIndex").value = "";
+      document.getElementById("roomForm").reset();
+      document.getElementById("roomModal").classList.remove("hidden");
+      document.getElementById("roomModal").classList.add("flex");
+    }
+
+    // 6. Fungsi Modal Edit
+    function openEditRoomModal(room) {
+      document.getElementById("modalTitle").innerText = `Edit Ruangan (${room.code})`;
+      document.getElementById("modalRowIndex").value = room.rowIndex;
+      document.getElementById("modalCode").value = room.code;
+      document.getElementById("modalLantai").value = room.lantai;
+      document.getElementById("modalProgram").value = room.program;
+      document.getElementById("modalWaktu").value = room.waktuLayanan;
+      document.getElementById("modalKursi").value = room.kursi;
+      document.getElementById("modalTv").value = room.tvSmart;
+      document.getElementById("modalAc").value = room.ac;
+      document.getElementById("modalStopKontak").value = room.stopKontak;
+      document.getElementById("modalPapanTulis").value = room.papanTulis;
+      document.getElementById("modalPetugas").value = (room.petugas && room.petugas !== "-") ? room.petugas : "";
+
+      document.getElementById("roomModal").classList.remove("hidden");
+      document.getElementById("roomModal").classList.add("flex");
+    }
+
+    function closeModal() {
+      document.getElementById("roomModal").classList.add("hidden");
+      document.getElementById("roomModal").classList.remove("flex");
+    }
+
+    // 7. Simpan / Edit data ke Apps Script
+    function handleSaveRoom(e) {
+      e.preventDefault();
+      const saveBtn = document.getElementById("saveBtn");
+      saveBtn.disabled = true;
+      saveBtn.innerHTML = `<i class="fas fa-circle-notch fa-spin"></i> Menyimpan...`;
+
+      const rowIndex = document.getElementById("modalRowIndex").value;
+      const isEdit = rowIndex !== "";
+
+      const payload = {
+        action: isEdit ? "updateRoom" : "addRoom",
+        rowIndex: rowIndex,
+        code: document.getElementById("modalCode").value,
+        lantai: document.getElementById("modalLantai").value,
+        program: document.getElementById("modalProgram").value,
+        waktuLayanan: document.getElementById("modalWaktu").value,
+        kursi: document.getElementById("modalKursi").value,
+        tvSmart: document.getElementById("modalTv").value,
+        ac: document.getElementById("modalAc").value,
+        stopKontak: document.getElementById("modalStopKontak").value,
+        papanTulis: document.getElementById("modalPapanTulis").value,
+        petugas: document.getElementById("modalPetugas").value
+      };
+
+      fetch(API_URL, {
+        method: "POST",
+        body: JSON.stringify(payload),
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        redirect: "follow"
+      })
+      .then(res => res.json())
+      .then(res => {
+        if(res.status === "success") {
+          alert(res.message || "Data berhasil disimpan!");
+          closeModal();
+          loadData();
+        } else {
+          alert("Gagal menyimpan: " + res.message);
+        }
+      })
+      .catch(err => alert("Terjadi kesalahan: " + err.message))
+      .finally(() => {
+        saveBtn.disabled = false;
+        saveBtn.innerHTML = `<i class="fas fa-save"></i> Simpan`;
+      });
     }
   </script>
 </body>
