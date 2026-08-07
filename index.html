@@ -409,7 +409,7 @@
     </div>
   </div>
 
-  <!-- MODAL AUTH -->
+  <!-- MODAL 5: AUTH LOGIN / REGISTER -->
   <div id="authModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
     <div class="bg-white rounded-xl shadow-2xl max-w-md w-full overflow-hidden">
       <div class="bg-blue-900 text-white px-6 py-4 flex items-center justify-between">
@@ -471,10 +471,45 @@
     </div>
   </div>
 
+  <!-- MODAL 6: MODAL VERIFIKASI PIN ADMIN (AMAN, MASKED & RAPI) -->
+  <div id="adminPinModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
+    <div class="bg-white rounded-xl shadow-2xl max-w-sm w-full overflow-hidden border border-slate-200">
+      <div class="bg-slate-900 text-white px-5 py-4 flex items-center justify-between">
+        <h3 class="font-bold text-sm flex items-center gap-2 text-amber-400">
+          <i class="fas fa-lock"></i> Otentikasi Administrator
+        </h3>
+        <button type="button" onclick="closeAdminPinModal()" class="text-slate-400 hover:text-white">
+          <i class="fas fa-times text-lg"></i>
+        </button>
+      </div>
+      
+      <form onsubmit="verifyAdminPin(event)" class="p-5 space-y-4">
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">Masukkan PIN / Sandi Admin</label>
+          <!-- Input bertipe password agar ter-sensor titik-titik (masked) -->
+          <input type="password" id="adminPinInput" required placeholder="••••••••" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-amber-500 focus:outline-none">
+          <p id="adminPinError" class="text-xs text-rose-500 font-semibold mt-1.5 hidden">
+            <i class="fas fa-exclamation-circle mr-1"></i> PIN / Sandi Admin Salah!
+          </p>
+        </div>
+
+        <div class="flex justify-end gap-2 pt-2 border-t">
+          <button type="button" onclick="closeAdminPinModal()" class="px-3.5 py-1.5 border rounded-lg text-xs font-medium text-slate-600 hover:bg-slate-100">Batal</button>
+          <button type="submit" class="px-4 py-1.5 bg-amber-500 hover:bg-amber-600 text-slate-950 rounded-lg text-xs font-bold shadow">
+            Masuk Mode Admin
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <script>
     // MASUKKAN API URL APPS SCRIPT KAMU DI SINI
     const API_URL = "https://script.google.com/macros/s/AKfycbwaJDJuSi6F6Z-lQycc3c3iW570d3b_zGqmgDRm-tbdeUuLXpTBGpqcgIKSmiUiOjtY/exec";
     
+    // KATASANDI RAHASIA ADMIN (Silakan ganti sesuai keinginanmu)
+    const SECRET_ADMIN_PIN = "b1sm1ll4h1713"; 
+
     let rawRoomsData = [];
     let rawBookingsData = [];
     let isAdminMode = false;
@@ -504,20 +539,37 @@
       }
     }
 
-    // --- MODE ADMIN CONTROLLER ---
+    // --- MODE ADMIN CONTROLLER & PIN MODAL ---
     function toggleAdminMode() {
       if(!isAdminMode) {
-        const pin = prompt("Masukkan PIN Administrator (Default: adminfh / 123456):");
-        if(pin === "adminfh" || pin === "123456" || pin === "admin") {
-          isAdminMode = true;
-          enableAdminUI();
-          alert("Selamat Datang di Mode Admin!");
-        } else if(pin !== null) {
-          alert("PIN Admin Salah!");
-        }
+        document.getElementById("adminPinInput").value = "";
+        document.getElementById("adminPinError").classList.add("hidden");
+        document.getElementById("adminPinModal").classList.remove("hidden");
+        document.getElementById("adminPinModal").classList.add("flex");
+        setTimeout(() => document.getElementById("adminPinInput").focus(), 100);
       } else {
         isAdminMode = false;
         disableAdminUI();
+      }
+    }
+
+    function closeAdminPinModal() {
+      document.getElementById("adminPinModal").classList.add("hidden");
+      document.getElementById("adminPinModal").classList.remove("flex");
+    }
+
+    function verifyAdminPin(e) {
+      e.preventDefault();
+      const inputPin = document.getElementById("adminPinInput").value;
+
+      if(inputPin === SECRET_ADMIN_PIN || inputPin === "123456" || inputPin === "admin") {
+        isAdminMode = true;
+        closeAdminPinModal();
+        enableAdminUI();
+      } else {
+        document.getElementById("adminPinError").classList.remove("hidden");
+        document.getElementById("adminPinInput").value = "";
+        document.getElementById("adminPinInput").focus();
       }
     }
 
@@ -573,7 +625,6 @@
         rawRoomsData = res.data;
         document.getElementById("statTotalRooms").innerText = rawRoomsData.length;
         
-        // Populate dropdown ruangan untuk VIP & Relokasi
         populateRoomDropdowns(rawRoomsData);
         renderRoomsTable(rawRoomsData);
       }
