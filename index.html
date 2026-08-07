@@ -43,14 +43,10 @@
     <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
       <div>
         <h2 class="text-2xl font-bold text-slate-900">Daftar Fasilitas Ruang Perkuliahan</h2>
-        <p class="text-slate-500 text-sm">Data realtime dari Google Sheets Fakultas Hukum UNESA</p>
+        <p class="text-slate-500 text-sm">Pilih ruangan dan klik tombol Pinjam untuk mengajukan peminjaman</p>
       </div>
       <div class="flex items-center gap-2">
-        <input type="text" id="searchInput" onkeyup="filterRooms()" placeholder="Cari Kode Ruang / Lantai..." class="px-4 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none w-64 shadow-sm">
-        
-        <button id="addRoomBtn" onclick="openAddRoomModal()" class="hidden bg-emerald-600 hover:bg-emerald-700 text-white text-sm px-4 py-2 rounded-lg font-medium transition items-center gap-2 shadow-sm">
-          <i class="fas fa-plus"></i> Tambah Ruang
-        </button>
+        <input type="text" id="searchInput" onkeyup="filterRooms()" placeholder="Cari Ruangan / Lantai..." class="px-4 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none w-64 shadow-sm">
       </div>
     </div>
 
@@ -85,73 +81,59 @@
     </div>
   </main>
 
-  <!-- MODAL EDIT / TAMBAH RUANG -->
-  <div id="roomModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
+  <!-- MODAL FORM PEMINJAMAN (PUBLIC) -->
+  <div id="bookingModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
     <div class="bg-white rounded-xl shadow-2xl max-w-lg w-full overflow-hidden">
       <div class="bg-blue-900 text-white px-6 py-4 flex items-center justify-between">
-        <h3 id="modalTitle" class="font-bold text-lg">Kelola Data Ruangan</h3>
-        <button type="button" onclick="closeModal()" class="text-blue-200 hover:text-white"><i class="fas fa-times text-xl"></i></button>
+        <div>
+          <h3 class="font-bold text-lg">Form Pengajuan Peminjaman</h3>
+          <p id="bookingRoomTitle" class="text-xs text-blue-200">Ruang: -</p>
+        </div>
+        <button type="button" onclick="closeBookingModal()" class="text-blue-200 hover:text-white"><i class="fas fa-times text-xl"></i></button>
       </div>
-      <form id="roomForm" onsubmit="handleSaveRoom(event)" class="p-6 space-y-4">
-        <input type="hidden" id="modalRowIndex">
+      <form id="bookingForm" onsubmit="handleSaveBooking(event)" class="p-6 space-y-4">
+        <input type="hidden" id="bookingRoomCode">
         
-        <div class="grid grid-cols-2 gap-4">
-          <div>
-            <label class="block text-xs font-semibold text-slate-600 mb-1">Lantai *</label>
-            <input type="text" id="modalLantai" placeholder="Contoh: 1, 2, atau F4.01" required class="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
-          </div>
-          <div>
-            <label class="block text-xs font-semibold text-slate-600 mb-1">Kode Ruang *</label>
-            <input type="text" id="modalCode" placeholder="Contoh: F4.01.06" required class="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
-          </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">Nama Lengkap Pemohon *</label>
+          <input type="text" id="bookNama" required placeholder="Contoh: Hana Salsabila" class="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
         </div>
 
         <div class="grid grid-cols-2 gap-4">
           <div>
-            <label class="block text-xs font-semibold text-slate-600 mb-1">Peruntukan</label>
-            <input type="text" id="modalProgram" placeholder="S1 / S2 / Umum" class="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
+            <label class="block text-xs font-semibold text-slate-600 mb-1">NIM / NIP / NIK *</label>
+            <input type="text" id="bookNim" required placeholder="2104070..." class="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
           </div>
           <div>
-            <label class="block text-xs font-semibold text-slate-600 mb-1">Waktu Layanan</label>
-            <input type="text" id="modalWaktu" value="07:00 - 17:10" class="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
-          </div>
-        </div>
-
-        <div class="grid grid-cols-3 gap-3">
-          <div>
-            <label class="block text-xs font-semibold text-slate-600 mb-1">Kursi</label>
-            <input type="number" id="modalKursi" required class="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
-          </div>
-          <div>
-            <label class="block text-xs font-semibold text-slate-600 mb-1">Smart TV</label>
-            <input type="number" id="modalTv" required class="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
-          </div>
-          <div>
-            <label class="block text-xs font-semibold text-slate-600 mb-1">AC</label>
-            <input type="number" id="modalAc" required class="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
-          </div>
-        </div>
-
-        <div class="grid grid-cols-2 gap-4">
-          <div>
-            <label class="block text-xs font-semibold text-slate-600 mb-1">Stop Kontak</label>
-            <input type="number" id="modalStopKontak" required class="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
-          </div>
-          <div>
-            <label class="block text-xs font-semibold text-slate-600 mb-1">Papan Tulis</label>
-            <input type="number" id="modalPapanTulis" required class="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
+            <label class="block text-xs font-semibold text-slate-600 mb-1">No. WhatsApp / HP *</label>
+            <input type="tel" id="bookHp" required placeholder="08123456789" class="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
           </div>
         </div>
 
         <div>
-          <label class="block text-xs font-semibold text-slate-600 mb-1">Petugas Pengelola / Kontak</label>
-          <input type="text" id="modalPetugas" placeholder="Nama Petugas - No WA" class="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
+          <label class="block text-xs font-semibold text-slate-600 mb-1">Keperluan / Nama Kegiatan *</label>
+          <input type="text" id="bookKeperluan" required placeholder="Contoh: Kuliah Pengganti HHT" class="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
+        </div>
+
+        <div class="grid grid-cols-3 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Tanggal *</label>
+            <input type="date" id="bookTanggal" required class="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Jam Mulai *</label>
+            <input type="time" id="bookJamMulai" required class="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Jam Selesai *</label>
+            <input type="time" id="bookJamSelesai" required class="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
+          </div>
         </div>
 
         <div class="flex justify-end gap-2 pt-4 border-t">
-          <button type="button" onclick="closeModal()" class="px-4 py-2 border text-slate-600 rounded-lg text-sm hover:bg-slate-100">Batal</button>
-          <button type="submit" id="saveBtn" class="px-4 py-2 bg-blue-900 text-white rounded-lg text-sm hover:bg-blue-800 font-medium">
-            <i class="fas fa-save mr-1"></i> Simpan Data
+          <button type="button" onclick="closeBookingModal()" class="px-4 py-2 border text-slate-600 rounded-lg text-sm hover:bg-slate-100 font-medium">Batal</button>
+          <button type="submit" id="submitBookingBtn" class="px-4 py-2 bg-blue-900 text-white rounded-lg text-sm hover:bg-blue-800 font-medium flex items-center gap-2">
+            <i class="fas fa-paper-plane"></i> Kirim Pengajuan
           </button>
         </div>
       </form>
@@ -159,36 +141,12 @@
   </div>
 
   <script>
-    const API_URL = "https://script.google.com/macros/s/AKfycbzmy7VcAMIcxWmGXZfLnmNfvxIsH8d7OvJTlIkePXd3XsC-xt-S1QAiPMr7z7_Epvly/exec";
+    const API_URL = "https://script.google.com/macros/s/AKfycbxFBEdkNct6btPVpzYGRnsBg2AUy38czhmIDDfGEdJw6UDTgUpfobXRemUCkdNxpoB3/exec";
     let rawRoomsData = [];
-    let isAdminMode = false;
 
     document.addEventListener("DOMContentLoaded", function() {
       loadData();
     });
-
-    function toggleAdminMode() {
-      if(!isAdminMode) {
-        const pass = prompt("Masukkan Password Admin Pengelola:");
-        if(pass === "admin123") {
-          isAdminMode = true;
-          document.getElementById("adminBtnText").innerText = "Mode Admin (Aktif)";
-          document.getElementById("adminToggleBtn").className = "bg-emerald-600 text-white text-xs px-3 py-2 rounded-lg transition flex items-center gap-1.5 font-medium shadow-sm";
-          document.getElementById("addRoomBtn").classList.remove("hidden");
-          document.getElementById("addRoomBtn").classList.add("flex");
-          renderTable(rawRoomsData);
-        } else if(pass !== null) {
-          alert("Password Admin Salah!");
-        }
-      } else {
-        isAdminMode = false;
-        document.getElementById("adminBtnText").innerText = "Mode Admin";
-        document.getElementById("adminToggleBtn").className = "bg-amber-600 hover:bg-amber-500 text-white text-xs px-3 py-2 rounded-lg transition flex items-center gap-1.5 font-medium shadow-sm";
-        document.getElementById("addRoomBtn").classList.add("hidden");
-        document.getElementById("addRoomBtn").classList.remove("flex");
-        renderTable(rawRoomsData);
-      }
-    }
 
     function loadData() {
       const tbody = document.getElementById("roomTableBody");
@@ -213,8 +171,6 @@
       if(result.status === "success") {
         rawRoomsData = result.data;
         renderTable(rawRoomsData);
-      } else {
-        document.getElementById("roomTableBody").innerHTML = `<tr><td colspan="10" class="text-center py-4 text-red-500">Gagal memuat data.</td></tr>`;
       }
     }
 
@@ -231,21 +187,6 @@
         const tr = document.createElement("tr");
         tr.className = "hover:bg-slate-50 transition border-b";
 
-        const roomJson = JSON.stringify(room).replace(/'/g, "&apos;");
-
-        let actionBtn = "";
-        if(isAdminMode) {
-          actionBtn = `
-            <button onclick='openEditRoomModal(${roomJson})' class="bg-amber-500 hover:bg-amber-600 text-white text-xs px-3 py-1.5 rounded-md font-medium transition flex items-center gap-1 mx-auto shadow-sm">
-              <i class="fas fa-edit"></i> Edit
-            </button>`;
-        } else {
-          actionBtn = `
-            <button onclick='alert("Silakan hubungi pengelola / ajukan lewat form peminjaman.")' class="bg-blue-600 hover:bg-blue-700 text-white text-xs px-3 py-1.5 rounded-md font-medium transition flex items-center gap-1 mx-auto shadow-sm">
-              <i class="fas fa-calendar-check"></i> Pinjam
-            </button>`;
-        }
-
         tr.innerHTML = `
           <td class="py-3 px-4 text-center font-medium text-slate-700">${room.lantai}</td>
           <td class="py-3 px-4 text-center font-bold text-blue-900">${room.code}</td>
@@ -258,93 +199,75 @@
           <td class="py-3 px-4 text-center">${room.stopKontak}</td>
           <td class="py-3 px-4 text-center">${room.papanTulis}</td>
           <td class="py-3 px-4 text-center text-xs text-slate-500">${room.waktuLayanan}</td>
-          <td class="py-3 px-4 text-center">${actionBtn}</td>
+          <td class="py-3 px-4 text-center">
+            <button onclick="openBookingModal('${room.code}')" class="bg-blue-600 hover:bg-blue-700 text-white text-xs px-3 py-1.5 rounded-md font-medium transition flex items-center gap-1 mx-auto shadow-sm">
+              <i class="fas fa-calendar-check"></i> Pinjam
+            </button>
+          </td>
         `;
         tbody.appendChild(tr);
       });
+    }
+
+    function openBookingModal(code) {
+      document.getElementById("bookingRoomCode").value = code;
+      document.getElementById("bookingRoomTitle").innerText = `Ruang: ${code}`;
+      document.getElementById("bookingForm").reset();
+      document.getElementById("bookingModal").classList.remove("hidden");
+      document.getElementById("bookingModal").classList.add("flex");
+    }
+
+    function closeBookingModal() {
+      document.getElementById("bookingModal").classList.add("hidden");
+      document.getElementById("bookingModal").classList.remove("flex");
+    }
+
+    // Mengirim Peminjaman Menggunakan JSONP (TIDAK AKAN KENA CORS ERROR)
+    function handleSaveBooking(e) {
+      e.preventDefault();
+      const btn = document.getElementById("submitBookingBtn");
+      btn.disabled = true;
+      btn.innerHTML = `<i class="fas fa-circle-notch fa-spin"></i> Mengirim...`;
+
+      const roomCode = encodeURIComponent(document.getElementById("bookingRoomCode").value);
+      const nama = encodeURIComponent(document.getElementById("bookNama").value);
+      const nim = encodeURIComponent(document.getElementById("bookNim").value);
+      const hp = encodeURIComponent(document.getElementById("bookHp").value);
+      const keperluan = encodeURIComponent(document.getElementById("bookKeperluan").value);
+      const tanggal = encodeURIComponent(document.getElementById("bookTanggal").value);
+      const jamMulai = encodeURIComponent(document.getElementById("bookJamMulai").value);
+      const jamSelesai = encodeURIComponent(document.getElementById("bookJamSelesai").value);
+
+      const oldBookingScript = document.getElementById("bookingScript");
+      if (oldBookingScript) oldBookingScript.remove();
+
+      const script = document.createElement("script");
+      script.id = "bookingScript";
+      script.src = `${API_URL}?action=addBooking&roomCode=${roomCode}&nama=${nama}&nim=${nim}&hp=${hp}&keperluan=${keperluan}&tanggal=${tanggal}&jamMulai=${jamMulai}&jamSelesai=${jamSelesai}&callback=handleBookingResponse`;
+      
+      document.body.appendChild(script);
+    }
+
+    function handleBookingResponse(res) {
+      const btn = document.getElementById("submitBookingBtn");
+      btn.disabled = false;
+      btn.innerHTML = `<i class="fas fa-paper-plane"></i> Kirim Pengajuan`;
+
+      if (res.status === "success") {
+        alert("🎉 Pengajuan Peminjaman Berhasil Dikirim! Data tersimpan di Google Sheets.");
+        closeBookingModal();
+      } else {
+        alert("Gagal mengirim peminjaman: " + res.message);
+      }
     }
 
     function filterRooms() {
       const query = document.getElementById("searchInput").value.toLowerCase();
       const filtered = rawRoomsData.filter(r => 
         String(r.code).toLowerCase().includes(query) ||
-        String(r.lantai).toLowerCase().includes(query) ||
-        String(r.program).toLowerCase().includes(query)
+        String(r.lantai).toLowerCase().includes(query)
       );
       renderTable(filtered);
-    }
-
-    function openAddRoomModal() {
-      document.getElementById("modalTitle").innerText = "Tambah Ruangan Baru";
-      document.getElementById("modalRowIndex").value = "";
-      document.getElementById("roomForm").reset();
-      document.getElementById("roomModal").classList.remove("hidden");
-      document.getElementById("roomModal").classList.add("flex");
-    }
-
-    function openEditRoomModal(room) {
-      document.getElementById("modalTitle").innerText = `Edit Ruangan (${room.code})`;
-      document.getElementById("modalRowIndex").value = room.rowIndex;
-      document.getElementById("modalLantai").value = room.lantai;
-      document.getElementById("modalCode").value = room.code;
-      document.getElementById("modalProgram").value = room.program;
-      document.getElementById("modalWaktu").value = room.waktuLayanan;
-      document.getElementById("modalKursi").value = room.kursi;
-      document.getElementById("modalTv").value = room.tvSmart;
-      document.getElementById("modalAc").value = room.ac;
-      document.getElementById("modalStopKontak").value = room.stopKontak;
-      document.getElementById("modalPapanTulis").value = room.papanTulis;
-      document.getElementById("modalPetugas").value = room.petugas || "";
-
-      document.getElementById("roomModal").classList.remove("hidden");
-      document.getElementById("roomModal").classList.add("flex");
-    }
-
-    function closeModal() {
-      document.getElementById("roomModal").classList.add("hidden");
-      document.getElementById("roomModal").classList.remove("flex");
-    }
-
-    function handleSaveRoom(e) {
-      e.preventDefault();
-      const saveBtn = document.getElementById("saveBtn");
-      saveBtn.disabled = true;
-      saveBtn.innerHTML = `<i class="fas fa-spinner fa-spin mr-1"></i> Menyimpan...`;
-
-      const rowIndex = document.getElementById("modalRowIndex").value;
-      const payload = {
-        action: rowIndex ? "updateRoom" : "addRoom",
-        rowIndex: rowIndex,
-        lantai: document.getElementById("modalLantai").value,
-        code: document.getElementById("modalCode").value,
-        program: document.getElementById("modalProgram").value,
-        waktuLayanan: document.getElementById("modalWaktu").value,
-        kursi: document.getElementById("modalKursi").value,
-        tvSmart: document.getElementById("modalTv").value,
-        ac: document.getElementById("modalAc").value,
-        stopKontak: document.getElementById("modalStopKontak").value,
-        papanTulis: document.getElementById("modalPapanTulis").value,
-        petugas: document.getElementById("modalPetugas").value
-      };
-
-      fetch(API_URL, {
-        method: "POST",
-        mode: "no-cors",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload)
-      })
-      .then(() => {
-        alert("Data berhasil dikirim ke Google Sheets!");
-        closeModal();
-        setTimeout(loadData, 1500); // Tunggu sebentar lalu reload data
-      })
-      .catch(err => {
-        alert("Terjadi masalah saat menyimpan. Silakan coba lagi.");
-      })
-      .finally(() => { 
-        saveBtn.disabled = false; 
-        saveBtn.innerHTML = `<i class="fas fa-save mr-1"></i> Simpan Data`;
-      });
     }
   </script>
 </body>
