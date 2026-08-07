@@ -159,18 +159,17 @@
   </div>
 
   <!-- SCRIPT INTEGRASI REALTIME -->
+  <!-- SCRIPT INTEGRASI TANPA KENDALA CORS (FAILED TO FETCH) -->
   <script>
-    // URL Web App Langsung dari Deployment Kamu
     const API_URL = "https://script.google.com/macros/s/AKfycbxMg-ESLCFyaqPWucit-u9wNEvpYovJr8t6nKBkHW7MAUEiBh00fzPpw-x6cK8QaCag/exec";
 
     let rawRoomsData = [];
-    let isAdmin = true; // Set true secara default agar tombol Edit/Tambah langsung terlihat
 
     document.addEventListener("DOMContentLoaded", function() {
       loadData();
     });
 
-    // Fetch Data dari Apps Script
+    // Fetch Data menggunakan redirect follow agar tidak diblokir CORS
     function loadData() {
       const tbody = document.getElementById("roomTableBody");
       tbody.innerHTML = `
@@ -181,19 +180,22 @@
           </td>
         </tr>`;
 
-      fetch(`${API_URL}?action=getRooms`)
-        .then(res => res.json())
-        .then(result => {
-          if(result.status === "success") {
-            rawRoomsData = result.data;
-            renderTable(rawRoomsData);
-          } else {
-            tbody.innerHTML = `<tr><td colspan="10" class="text-center py-4 text-red-500">Gagal memuat data: ${result.message}</td></tr>`;
-          }
-        })
-        .catch(err => {
-          tbody.innerHTML = `<tr><td colspan="10" class="text-center py-4 text-red-500">Error koneksi: ${err.message}</td></tr>`;
-        });
+      fetch(`${API_URL}?action=getRooms`, {
+        method: "GET",
+        redirect: "follow"
+      })
+      .then(res => res.json())
+      .then(result => {
+        if(result.status === "success") {
+          rawRoomsData = result.data;
+          renderTable(rawRoomsData);
+        } else {
+          tbody.innerHTML = `<tr><td colspan="10" class="text-center py-4 text-red-500">Gagal memuat data: ${result.message}</td></tr>`;
+        }
+      })
+      .catch(err => {
+        tbody.innerHTML = `<tr><td colspan="10" class="text-center py-4 text-red-500">Error koneksi: ${err.message}. Pastikan Web App Apps Script disetel ke "Anyone" (Siapa Saja).</td></tr>`;
+      });
     }
 
     // Render Data ke Tabel
@@ -201,7 +203,7 @@
       const tbody = document.getElementById("roomTableBody");
       tbody.innerHTML = "";
 
-      if(data.length === 0) {
+      if(!data || data.length === 0) {
         tbody.innerHTML = `<tr><td colspan="10" class="text-center py-6 text-slate-400">Tidak ada data ruangan.</td></tr>`;
         return;
       }
@@ -231,7 +233,6 @@
         tbody.appendChild(tr);
       });
 
-      // Tampilkan tombol Tambah Ruang
       document.getElementById("addRoomBtn").classList.remove("hidden");
     }
 
@@ -246,7 +247,7 @@
       renderTable(filtered);
     }
 
-    // Open Modal Tambah
+    // Modal Handlers
     function openAddRoomModal() {
       document.getElementById("modalTitle").innerText = "Tambah Ruangan Baru";
       document.getElementById("modalRowIndex").value = "";
@@ -255,7 +256,6 @@
       document.getElementById("roomModal").classList.add("flex");
     }
 
-    // Open Modal Edit
     function openEditRoomModal(room) {
       document.getElementById("modalTitle").innerText = `Edit Ruangan (${room.code})`;
       document.getElementById("modalRowIndex").value = room.rowIndex;
@@ -279,7 +279,7 @@
       document.getElementById("roomModal").classList.remove("flex");
     }
 
-    // Kirim Data Simpan / Edit ke Apps Script
+    // Simpan data via POST
     function handleSaveRoom(e) {
       e.preventDefault();
       const saveBtn = document.getElementById("saveBtn");
@@ -306,7 +306,9 @@
 
       fetch(API_URL, {
         method: "POST",
-        body: JSON.stringify(payload)
+        body: JSON.stringify(payload),
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        redirect: "follow"
       })
       .then(res => res.json())
       .then(res => {
