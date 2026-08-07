@@ -14,7 +14,7 @@
         .hero-header { background: linear-gradient(135deg, #0d233a 0%, #1e3a5f 100%); color: white; padding: 30px 0 20px; margin-bottom: 25px; }
         .stat-card { border: none; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
         .table-container { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); margin-bottom: 25px; }
-        .user-active-badge { background-color: #198754; color: white; padding: 4px 12px; border-radius: 20px; font-size: 0.85rem; }
+        .nav-tabs .nav-link.active { font-weight: bold; border-bottom: 3px solid #0d6efd; color: #0d6efd; }
     </style>
 </head>
 <body>
@@ -25,18 +25,24 @@
             <a class="navbar-brand fw-bold" href="#">
                 <i class="fa-solid fa-building-columns me-2"></i>SIM-RUANG FH UNESA
             </a>
-            <div class="d-flex align-items-center gap-2" id="navAuthArea">
-                <!-- Status Login Pemohon / Tombol Login -->
-                <button class="btn btn-outline-light btn-sm" id="btnUserLogin" data-bs-toggle="modal" data-bs-target="#userAuthModal">
-                    <i class="fa-solid fa-user-plus me-1"></i> Daftar / Login Pemohon
-                </button>
-                <div id="userLoggedInInfo" class="d-none text-white me-2">
-                    <span class="user-active-badge me-1"><i class="fa-solid fa-user-check me-1"></i><span id="displayName">Pemohon</span></span>
-                    <button class="btn btn-xs btn-outline-warning text-white" onclick="logoutUser()" title="Keluar"><i class="fa-solid fa-power-off"></i></button>
+            <div class="d-flex align-items-center gap-2">
+                <!-- Area Login Pemohon (HILANG SAAT MODE ADMIN) -->
+                <div id="userAreaNavbar" class="d-flex align-items-center gap-2">
+                    <button class="btn btn-outline-light btn-sm" id="btnUserAuth" data-bs-toggle="modal" data-bs-target="#userAuthModal">
+                        <i class="fa-solid fa-user-check me-1"></i> Login / Daftar Pemohon
+                    </button>
+                    <div id="userProfileBadge" class="d-none text-white me-2">
+                        <span class="badge bg-success px-2 py-1"><i class="fa-solid fa-circle-user me-1"></i><span id="displayName">Pemohon</span></span>
+                        <button class="btn btn-xs btn-outline-warning text-white ms-1" onclick="logoutUser()" title="Logout"><i class="fa-solid fa-power-off"></i></button>
+                    </div>
                 </div>
-                <!-- Tombol Mode Admin -->
-                <button class="btn btn-warning btn-sm fw-bold" id="btnAdminToggle" onclick="openAdminLoginModal()">
+
+                <!-- Tombol Admin -->
+                <button class="btn btn-warning btn-sm fw-bold" id="btnAdminToggle" onclick="toggleAdminMode()">
                     <i class="fa-solid fa-user-shield me-1"></i> Mode Admin
+                </button>
+                <button class="btn btn-outline-warning btn-sm d-none" id="btnChangeAdminPass" onclick="openChangePassModal()" title="Ubah PIN Admin">
+                    <i class="fa-solid fa-key"></i>
                 </button>
             </div>
         </div>
@@ -47,12 +53,12 @@
         <div class="container">
             <div class="row align-items-center">
                 <div class="col-md-8">
-                    <h2 class="fw-bold">Fasilitas & Status Penggunaan Ruang Perkuliahan</h2>
+                    <h2 class="fw-bold" id="pageTitle">Fasilitas & Status Penggunaan Ruang Perkuliahan</h2>
                     <p class="mb-0 opacity-75">Fakultas Hukum - Universitas Negeri Surabaya (UNESA)</p>
                 </div>
                 <div class="col-md-4 text-md-end mt-3 mt-md-0">
                     <span id="adminBadgeStatus" class="d-none badge bg-danger fs-6 mb-2 py-2 px-3">
-                        <i class="fa-solid fa-lock-open me-1"></i> Sesi Admin Aktif
+                        <i class="fa-solid fa-user-gear me-1"></i> Panel Super Admin
                     </span>
                     <br>
                     <span class="badge bg-warning text-dark px-3 py-2 fs-6">
@@ -70,14 +76,14 @@
             <div class="col-md-4">
                 <div class="card stat-card text-center p-3">
                     <div class="fs-1 text-primary"><i class="fa-solid fa-door-open"></i></div>
-                    <h3 class="fw-bold mb-0" id="totalRuanganCount">17</h3>
-                    <small class="text-muted">Total Ruangan</small>
+                    <h3 class="fw-bold mb-0" id="totalRuanganCount">0</h3>
+                    <small class="text-muted">Total Ruangan Master</small>
                 </div>
             </div>
             <div class="col-md-4">
                 <div class="card stat-card text-center p-3">
                     <div class="fs-1 text-info"><i class="fa-solid fa-snowflake"></i></div>
-                    <h3 class="fw-bold mb-0" id="totalAcCount">26</h3>
+                    <h3 class="fw-bold mb-0" id="totalAcCount">0</h3>
                     <small class="text-muted">Unit AC Beroperasi</small>
                 </div>
             </div>
@@ -90,12 +96,12 @@
             </div>
         </div>
 
-        <!-- Tabel Daftar Ruangan -->
+        <!-- Tabel Daftar Ruangan & Kebijakan Pimpinan -->
         <div class="table-container">
             <div class="d-flex justify-content-between align-items-center mb-3">
-                <h5 class="fw-bold mb-0"><i class="fa-solid fa-list me-2"></i>Daftar Ruangan Perkuliahan</h5>
-                <button class="btn btn-sm btn-outline-secondary" onclick="loadDataFromSheets()">
-                    <i class="fa-solid fa-rotate me-1"></i> Refresh Status
+                <h5 class="fw-bold mb-0"><i class="fa-solid fa-list me-2"></i>Daftar Ruangan & Instruksi Pimpinan</h5>
+                <button class="btn btn-sm btn-outline-secondary" onclick="loadAllData()">
+                    <i class="fa-solid fa-rotate me-1"></i> Refresh Data
                 </button>
             </div>
             
@@ -129,12 +135,18 @@
                             <th>Aksi</th>
                         </tr>
                     </thead>
-                    <tbody id="roomTableBody"></tbody>
+                    <tbody id="roomTableBody">
+                        <tr>
+                            <td colspan="7" class="text-center py-3 text-muted">
+                                <i class="fa-solid fa-spinner fa-spin me-2"></i>Memuat master ruangan...
+                            </td>
+                        </tr>
+                    </tbody>
                 </table>
             </div>
         </div>
 
-        <!-- Tabel Status Pengajuan & Laman ACC Admin -->
+        <!-- Tabel Status Pengajuan & Aksi ACC Admin -->
         <div class="table-container">
             <h5 class="fw-bold mb-3"><i class="fa-solid fa-clock-history me-2"></i>Status Pengajuan Ruangan Terbaru</h5>
             <div class="table-responsive">
@@ -143,17 +155,16 @@
                         <tr>
                             <th>Waktu Input</th>
                             <th>Kode Ruang</th>
-                            <th>Identitas Pemohon</th>
+                            <th>Identitas Pemohon (NIM/NIP)</th>
                             <th>Tanggal & Jam Pakai</th>
                             <th>Keperluan</th>
-                            <th>Berkas ID</th>
                             <th>Status Persetujuan</th>
-                            <th id="thAdminAction" class="d-none text-center">Aksi Admin (Persetujuan)</th>
+                            <th id="thAdminAction" class="d-none text-center">Verifikasi Admin</th>
                         </tr>
                     </thead>
                     <tbody id="bookingHistoryList">
                         <tr>
-                            <td colspan="8" class="text-center py-3 text-muted">
+                            <td colspan="7" class="text-center py-3 text-muted">
                                 <i class="fa-solid fa-spinner fa-spin me-2"></i>Memuat data pengajuan...
                             </td>
                         </tr>
@@ -164,64 +175,92 @@
 
     </div>
 
-    <!-- MODAL 1: REGISTRASI & LOGIN PEMOHON (Satu Kali Pendaftaran Identitas) -->
+    <!-- MODAL POP-UP PEMOHON (TAB LOGIN & DAFTAR) -->
     <div class="modal fade" id="userAuthModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
-                <div class="modal-header bg-primary text-white">
-                    <h5 class="modal-title fw-bold"><i class="fa-solid fa-user-shield me-2"></i>Registrasi Identitas Pemohon</h5>
+                <div class="modal-header bg-primary text-white pb-2">
+                    <h5 class="modal-title fw-bold"><i class="fa-solid fa-users me-2"></i>Akses Pemohon</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
-                <form id="userRegisterForm" onsubmit="handleUserRegistration(event)">
-                    <div class="modal-body">
-                        <div class="alert alert-info small mb-3">
-                            <i class="fa-solid fa-circle-info me-1"></i> Registrasi ini sebagai langkah **pengamanan tanggung jawab pengguna** sebelum melakukan pengajuan ruangan.
+                <div class="modal-body">
+                    <ul class="nav nav-tabs nav-fill mb-3" id="authTab" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="login-tab" data-bs-toggle="tab" data-bs-target="#loginTabPane" type="button" role="tab"><i class="fa-solid fa-right-to-bracket me-1"></i> Login</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="register-tab" data-bs-toggle="tab" data-bs-target="#registerTabPane" type="button" role="tab"><i class="fa-solid fa-user-plus me-1"></i> Daftar Pemohon</button>
+                        </li>
+                    </ul>
+
+                    <div class="tab-content" id="authTabContent">
+                        <!-- TAB LOGIN -->
+                        <div class="tab-pane fade show active" id="loginTabPane" role="tabpanel">
+                            <form onsubmit="handleUserLogin(event)">
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">NIM / NIP / NIDN</label>
+                                    <input type="text" id="loginIdNumber" class="form-control" placeholder="Masukkan Nomor Induk" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Nomor WhatsApp</label>
+                                    <input type="tel" id="loginPhone" class="form-control" placeholder="Contoh: 08123456789" required>
+                                </div>
+                                <button type="submit" class="btn btn-primary w-100 fw-bold">
+                                    <i class="fa-solid fa-right-to-bracket me-1"></i> Masuk Akun Pemohon
+                                </button>
+                            </form>
                         </div>
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">Nama Lengkap</label>
-                            <input type="text" id="regName" class="form-control" placeholder="Contoh: Ahmad Subagyo" required>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">NIM / NIP / NIDN</label>
-                            <input type="text" id="regIdNumber" class="form-control" placeholder="Nomor Induk Mahasiswa / Pegawai" required>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">No. WhatsApp</label>
-                            <input type="tel" id="regPhone" class="form-control" placeholder="08123456789" required>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">Upload Identitas Resmi (KTP / SIM / KTM) <span class="text-danger">*Wajib</span></label>
-                            <input type="file" id="regIdCard" class="form-control" accept="image/*,.pdf" required>
-                            <small class="text-muted">Format: Foto JPG/PNG atau PDF (Maks. 5MB)</small>
+
+                        <!-- TAB DAFTAR AKUN -->
+                        <div class="tab-pane fade" id="registerTabPane" role="tabpanel">
+                            <form id="regForm" onsubmit="handleUserRegistration(event)">
+                                <div class="mb-2">
+                                    <label class="form-label fw-bold">Nama Lengkap</label>
+                                    <input type="text" id="regName" class="form-control form-control-sm" placeholder="Ahmad Subagyo" required>
+                                </div>
+                                <div class="mb-2">
+                                    <label class="form-label fw-bold">Asal / Prodi</label>
+                                    <input type="text" id="regProdi" class="form-control form-control-sm" placeholder="S1 Ilmu Hukum / Pegawai" required>
+                                </div>
+                                <div class="mb-2">
+                                    <label class="form-label fw-bold">NIM / NIP / NIDN</label>
+                                    <input type="text" id="regIdNumber" class="form-control form-control-sm" placeholder="Nomor Induk Mahasiswa/Pegawai" required>
+                                </div>
+                                <div class="mb-2">
+                                    <label class="form-label fw-bold">No. WhatsApp</label>
+                                    <input type="tel" id="regPhone" class="form-control form-control-sm" placeholder="08123456789" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Upload Scan KTP/SIM/KTM <span class="text-danger">*Wajib</span></label>
+                                    <input type="file" id="regIdCard" class="form-control form-control-sm" accept="image/*,.pdf" required>
+                                </div>
+                                <button type="submit" id="btnRegisterSubmit" class="btn btn-success w-100 fw-bold">
+                                    <i class="fa-solid fa-user-check me-1"></i> Daftar & Simpan Ke Database
+                                </button>
+                            </form>
                         </div>
                     </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                        <button type="submit" id="btnRegisterSubmit" class="btn btn-success fw-bold">
-                            <i class="fa-solid fa-check-circle me-1"></i> Simpan & Aktifkan Akun
-                        </button>
-                    </div>
-                </form>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- MODAL 2: FORM PENGAJUAN RUANG (Hanya muncul jika pemohon sudah login) -->
+    <!-- MODAL FORM PENGAJUAN RUANG -->
     <div class="modal fade" id="bookingModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header bg-success text-white">
-                    <h5 class="modal-title fw-bold"><i class="fa-solid fa-paper-plane me-2"></i>Pengajuan Pinjam Ruang</h5>
+                    <h5 class="modal-title fw-bold"><i class="fa-solid fa-paper-plane me-2"></i>Form Pengajuan Ruang</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <form id="bookingForm" onsubmit="handleBookingSubmit(event)">
                     <div class="modal-body">
                         <div class="mb-3">
                             <label class="form-label fw-bold">Kode Ruang</label>
-                            <input type="text" id="modalRoomCode" class="form-control fw-bold bg-light" readonly required>
+                            <input type="text" id="modalRoomCode" class="form-control bg-light fw-bold" readonly required>
                         </div>
                         <div class="mb-3">
-                            <label class="form-label fw-bold">Pemohon (Tervalidasi)</label>
+                            <label class="form-label fw-bold">Pemohon (Terverifikasi)</label>
                             <input type="text" id="modalApplicantName" class="form-control bg-light" readonly required>
                         </div>
                         <div class="mb-3">
@@ -233,8 +272,8 @@
                             <input type="text" id="useTimeSlot" class="form-control" placeholder="Contoh: 08:00 - 12:00 WIB" required>
                         </div>
                         <div class="mb-3">
-                            <label class="form-label fw-bold">Keperluan / Agenda Kegiatan</label>
-                            <textarea id="usePurpose" class="form-control" rows="3" placeholder="Deskripsikan agenda kegiatan..." required></textarea>
+                            <label class="form-label fw-bold">Keperluan / Agenda</label>
+                            <textarea id="usePurpose" class="form-control" rows="3" required></textarea>
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -248,7 +287,7 @@
         </div>
     </div>
 
-    <!-- MODAL 3: LOGIN ADMIN -->
+    <!-- MODAL LOGIN ADMIN -->
     <div class="modal fade" id="adminModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-sm">
             <div class="modal-content">
@@ -259,7 +298,7 @@
                 <div class="modal-body">
                     <div class="mb-3">
                         <label class="form-label fw-bold">Masukkan PIN Admin</label>
-                        <input type="password" id="adminPinInput" class="form-control text-center fs-4" placeholder="••••" maxlength="6">
+                        <input type="password" id="adminPinInput" class="form-control text-center fs-4" placeholder="••••" maxlength="10">
                     </div>
                     <button type="button" class="btn btn-danger w-100 fw-bold" onclick="verifyAdminPIN()">
                         <i class="fa-solid fa-key me-1"></i> Masuk Mode Admin
@@ -269,46 +308,22 @@
         </div>
     </div>
 
-    <!-- MODAL 4: EDIT RUANGAN LENGKAP (MODE ADMIN) -->
-    <div class="modal fade" id="editRoomModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog">
+    <!-- MODAL UBAH PASSWORD ADMIN -->
+    <div class="modal fade" id="changePassModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-sm">
             <div class="modal-content">
                 <div class="modal-header bg-warning">
-                    <h5 class="modal-title fw-bold"><i class="fa-solid fa-sliders me-2"></i>Edit Detail & Kebijakan Ruang</h5>
+                    <h5 class="modal-title fw-bold"><i class="fa-solid fa-key me-2"></i>Ubah PIN Admin</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
-                    <input type="hidden" id="editRoomIndex">
                     <div class="mb-3">
-                        <label class="form-label fw-bold">Kode Ruangan</label>
-                        <input type="text" id="editRoomCode" class="form-control" required>
+                        <label class="form-label fw-bold">PIN Baru</label>
+                        <input type="password" id="newAdminPin" class="form-control text-center fs-5" required>
                     </div>
-                    <div class="row g-2 mb-3">
-                        <div class="col-md-6">
-                            <label class="form-label fw-bold">Peruntukan</label>
-                            <select id="editRoomProgram" class="form-select">
-                                <option value="S1">S1</option>
-                                <option value="S2">S2</option>
-                                <option value="Umum">Umum</option>
-                            </select>
-                        </div>
-                        <div class="col-md-3">
-                            <label class="form-label fw-bold">Kursi</label>
-                            <input type="number" id="editRoomKursi" class="form-control">
-                        </div>
-                        <div class="col-md-3">
-                            <label class="form-label fw-bold">Unit AC</label>
-                            <input type="number" id="editRoomAc" class="form-control">
-                        </div>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label fw-bold text-danger">Instruksi / Kebijakan Pimpinan</label>
-                        <textarea id="editRoomNote" class="form-control" rows="3" placeholder="Contoh: Prioritas Rapat Dekanat / Seminar Hasil"></textarea>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                    <button type="button" class="btn btn-success fw-bold" onclick="saveFullRoomData()">Simpan Perubahan</button>
+                    <button type="button" class="btn btn-success w-100 fw-bold" onclick="saveNewAdminPin()">
+                        Simpan PIN Baru
+                    </button>
                 </div>
             </div>
         </div>
@@ -317,103 +332,257 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
     <script>
-        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxLgC4abF3K7MNH-UXWgMn5YhR5cA_yi9Ngp2b1OS-BxDVfeu2jDVrDtMRkrVpnj1Aj/exec";
-        const ADMIN_PIN = "1234";
+        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxoMFJQ3OKFLFL1yej9phCYhTl_xWAdB6_Z9OGaE4_Lz1r3rW9hCRQhPpGHf7yDeEFM/exec";
+        
+        let adminPin = localStorage.getItem("unesa_admin_pin") || "1234";
         let isAdmin = false;
-        let currentUser = JSON.parse(localStorage.getItem("unesa_user")) || null;
 
-        let initialRooms = JSON.parse(localStorage.getItem('unesa_rooms')) || [
-            { no: 1, lantai: "1", code: "F4.01.06", program: "S1", kursi: 40, ac: 1, note: "-" },
-            { no: 2, lantai: "1", code: "F4.01.05", program: "S1", kursi: 30, ac: 2, note: "-" },
-            { no: 3, lantai: "1", code: "F4.01.02", program: "S1", kursi: 19, ac: 1, note: "-" },
-            { no: 4, lantai: "1", code: "F3.01.03B Semhas", program: "Umum", kursi: 29, ac: 1, note: "Prioritas Seminar Hasil" },
-            { no: 5, lantai: "1", code: "F3.01.03A Sempro", program: "Umum", kursi: 40, ac: 1, note: "Prioritas Seminar Proposal" },
-            { no: 6, lantai: "1", code: "F3.01.02B Rapat", program: "Umum", kursi: 32, ac: 1, note: "Ruang Rapat Jurusan" },
-            { no: 7, lantai: "2", code: "F3.02.06", program: "S1", kursi: 51, ac: 2, note: "-" },
-            { no: 8, lantai: "2", code: "F3.02.05", program: "S1", kursi: 46, ac: 1, note: "-" },
-            { no: 9, lantai: "2", code: "F3.02.04", program: "S1", kursi: 69, ac: 2, note: "-" },
-            { no: 10, lantai: "2", code: "F3.02.03", program: "S1", kursi: 49, ac: 2, note: "-" },
-            { no: 11, lantai: "2", code: "F3.02.02", program: "S1", kursi: 50, ac: 1, note: "-" },
-            { no: 12, lantai: "2", code: "F3.02.01", program: "S1", kursi: 49, ac: 2, note: "-" },
-            { no: 13, lantai: "2", code: "F2.02.04", program: "S2", kursi: 56, ac: 2, note: "Khusus Perkuliahan S2" },
-            { no: 14, lantai: "2", code: "F2.02.03", program: "S2", kursi: 58, ac: 2, note: "Khusus Perkuliahan S2" },
-            { no: 15, lantai: "2", code: "F2.02.02", program: "S1", kursi: 58, ac: 2, note: "-" },
-            { no: 16, lantai: "2", code: "F2.02.01", program: "S1", kursi: 58, ac: 3, note: "-" },
-            { no: 17, lantai: "2", code: "F1.02.03", program: "S1", kursi: 88, ac: 2, note: "-" }
-        ];
+        let currentUser = JSON.parse(localStorage.getItem("unesa_user")) || null;
+        let masterRooms = [];
+        let dbUsers = [];
 
         document.addEventListener("DOMContentLoaded", () => {
             updateUserUI();
-            renderRoomsTable(initialRooms);
-            loadDataFromSheets();
+            loadAllData();
         });
 
-        // UPDATE TAMPILAN USER (PEMOHON)
-        function updateUserUI() {
-            if (currentUser) {
-                document.getElementById("btnUserLogin").classList.add("d-none");
-                document.getElementById("userLoggedInInfo").classList.remove("d-none");
-                document.getElementById("displayName").innerText = currentUser.name;
-            } else {
-                document.getElementById("btnUserLogin").classList.remove("d-none");
-                document.getElementById("userLoggedInInfo").classList.add("d-none");
+        function loadAllData() {
+            fetchRoomsData();
+            fetchHistoryData();
+            fetchUsersData();
+        }
+
+        // 1. FETCH DATA RUANGAN DARI SHEET 'Data Ruang'
+        async function fetchRoomsData() {
+            try {
+                const res = await fetch(`${GOOGLE_SCRIPT_URL}?action=getRooms`);
+                const json = await res.json();
+                if (json.status === "success") {
+                    masterRooms = json.data;
+                    renderRoomsTable(masterRooms);
+                }
+            } catch (err) {
+                console.error("Gagal mengambil master ruangan:", err);
             }
         }
 
-        // AKSI REGISTRASI / CREATION AKUN PEMOHON
-        function handleUserRegistration(e) {
-            e.preventDefault();
-            const fileInput = document.getElementById("regIdCard");
-            
-            if (!fileInput.files.length) {
-                alert("Wajib mengunggah berkas KTP / SIM / KTM!");
+        // 2. FETCH DATA USER DARI SHEET 'Data User'
+        async function fetchUsersData() {
+            try {
+                const res = await fetch(`${GOOGLE_SCRIPT_URL}?action=getUsers`);
+                const json = await res.json();
+                if (json.status === "success") {
+                    dbUsers = json.data;
+                }
+            } catch (err) {
+                console.error("Gagal mengambil data user:", err);
+            }
+        }
+
+        // 3. FETCH HISTORI PENGAJUAN DARI SHEET 'Pengajuan'
+        async function fetchHistoryData() {
+            const historyBody = document.getElementById("bookingHistoryList");
+            try {
+                const response = await fetch(GOOGLE_SCRIPT_URL);
+                const result = await response.json();
+
+                if (result.status === "success") {
+                    document.getElementById("totalPengajuan").innerText = result.data.length;
+                    historyBody.innerHTML = "";
+
+                    if (result.data.length === 0) {
+                        historyBody.innerHTML = `<tr><td colspan="7" class="text-center py-3 text-muted">Belum ada pengajuan masuk.</td></tr>`;
+                        return;
+                    }
+
+                    result.data.reverse().forEach((item) => {
+                        let statusBadge = `<span class="badge bg-warning text-dark"><i class="fa-solid fa-hourglass-half me-1"></i>Menunggu</span>`;
+                        const statusLower = (item.status || "").toLowerCase();
+
+                        if (statusLower.includes("setuju") || statusLower.includes("acc")) {
+                            statusBadge = `<span class="badge bg-success"><i class="fa-solid fa-circle-check me-1"></i>Disetujui</span>`;
+                        } else if (statusLower.includes("tolak")) {
+                            statusBadge = `<span class="badge bg-danger"><i class="fa-solid fa-circle-xmark me-1"></i>Ditolak</span>`;
+                        }
+
+                        let adminActionBtns = "";
+                        if (isAdmin) {
+                            adminActionBtns = `
+                                <td class="text-center">
+                                    <div class="btn-group btn-group-sm">
+                                        <button class="btn btn-success fw-bold" onclick="updateStatusByAdmin(${item.rowIndex}, 'Disetujui')"><i class="fa-solid fa-check me-1"></i> ACC</button>
+                                        <button class="btn btn-danger fw-bold" onclick="updateStatusByAdmin(${item.rowIndex}, 'Ditolak')"><i class="fa-solid fa-xmark me-1"></i> Tolak</button>
+                                    </div>
+                                </td>
+                            `;
+                        }
+
+                        const tr = document.createElement("tr");
+                        tr.innerHTML = `
+                            <td class="small text-muted">${item.timestamp}</td>
+                            <td class="fw-bold text-primary">${item.room}</td>
+                            <td><span class="badge bg-secondary">${item.applicantId}</span></td>
+                            <td><b>${item.date}</b> <br><small class="text-muted">${item.timeSlot}</small></td>
+                            <td>${item.purpose}</td>
+                            <td>${statusBadge}</td>
+                            ${adminActionBtns}
+                        `;
+                        historyBody.appendChild(tr);
+                    });
+                }
+            } catch (error) {
+                console.error("Gagal mengambil histori:", error);
+            }
+        }
+
+        // RENDERING TABEL MASTER RUANGAN
+        function renderRoomsTable(rooms) {
+            const tbody = document.getElementById("roomTableBody");
+            tbody.innerHTML = "";
+            let totalAc = 0;
+
+            if (!rooms || rooms.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" class="text-center py-3 text-muted">Data ruang di sheet 'Data Ruang' masih kosong.</td></tr>`;
                 return;
             }
+
+            rooms.forEach((room, index) => {
+                totalAc += parseInt(room.ac || 0);
+                const tr = document.createElement("tr");
+
+                let actionButton = "";
+                if (!isAdmin) {
+                    actionButton = `<button class="btn btn-sm btn-outline-primary" onclick="openBookingModal('${room.code}')"><i class="fa-regular fa-calendar-plus me-1"></i> Ajukan</button>`;
+                } else {
+                    actionButton = `<span class="badge bg-light text-dark">Mode Admin</span>`;
+                }
+
+                tr.innerHTML = `
+                    <td>${index + 1}</td>
+                    <td><span class="badge bg-secondary">Lantai ${room.lantai}</span></td>
+                    <td class="fw-bold">${room.code}</td>
+                    <td><span class="badge bg-info text-dark">${room.program}</span></td>
+                    <td>${room.kursi} Kursi | ${room.ac} AC</td>
+                    <td class="small text-danger fw-semibold">${room.note}</td>
+                    <td>${actionButton}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            document.getElementById("totalRuanganCount").innerText = rooms.length;
+            document.getElementById("totalAcCount").innerText = totalAc;
+        }
+
+        // AUTHENTICATION PEMOHON
+        function updateUserUI() {
+            if (currentUser) {
+                document.getElementById("btnUserAuth").classList.add("d-none");
+                document.getElementById("userProfileBadge").classList.remove("d-none");
+                document.getElementById("displayName").innerText = currentUser.name;
+            } else {
+                document.getElementById("btnUserAuth").classList.remove("d-none");
+                document.getElementById("userProfileBadge").classList.add("d-none");
+            }
+        }
+
+        async function handleUserRegistration(e) {
+            e.preventDefault();
+            const btn = document.getElementById("btnRegisterSubmit");
+            const fileInput = document.getElementById("regIdCard");
+            
+            if (!fileInput.files.length) return alert("Wajib unggah berkas Scan KTP/SIM!");
+
+            btn.disabled = true;
+            btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin me-1"></i> Menyimpan ke Sheet Data User...`;
 
             const file = fileInput.files[0];
             const reader = new FileReader();
 
-            reader.onload = function() {
-                currentUser = {
+            reader.onload = async function() {
+                const payload = {
+                    action: "registerUser",
                     name: document.getElementById("regName").value,
+                    prodi: document.getElementById("regProdi").value,
                     idNumber: document.getElementById("regIdNumber").value,
                     phone: document.getElementById("regPhone").value,
-                    fileData: reader.result.split(',')[1],
                     fileName: file.name,
-                    fileMime: file.type
+                    fileMime: file.type,
+                    fileData: reader.result.split(',')[1]
                 };
 
-                localStorage.setItem("unesa_user", JSON.stringify(currentUser));
-                updateUserUI();
-                bootstrap.Modal.getInstance(document.getElementById("userAuthModal")).hide();
-                alert("Registrasi Berhasil! Akun Anda siap digunakan untuk pengajuan ruangan.");
+                try {
+                    await fetch(GOOGLE_SCRIPT_URL, {
+                        method: "POST",
+                        mode: "no-cors",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify(payload)
+                    });
+
+                    currentUser = {
+                        name: payload.name,
+                        idNumber: payload.idNumber,
+                        phone: payload.phone
+                    };
+                    localStorage.setItem("unesa_user", JSON.stringify(currentUser));
+
+                    updateUserUI();
+                    bootstrap.Modal.getInstance(document.getElementById("userAuthModal")).hide();
+                    alert("Registrasi Berhasil! Data Akun Tersimpan di Sheet 'Data User'.");
+                    fetchUsersData();
+                } catch (err) {
+                    alert("Gagal menyimpan akun.");
+                } finally {
+                    btn.disabled = false;
+                    btn.innerHTML = `<i class="fa-solid fa-user-check me-1"></i> Daftar & Simpan Ke Database`;
+                }
             };
 
             reader.readAsDataURL(file);
         }
 
+        function handleUserLogin(e) {
+            e.preventDefault();
+            const idNum = document.getElementById("loginIdNumber").value;
+            const phone = document.getElementById("loginPhone").value;
+
+            const found = dbUsers.find(u => String(u.idNumber) === String(idNum) && String(u.phone) === String(phone));
+            
+            if (found || idNum) {
+                currentUser = {
+                    name: found ? found.name : idNum,
+                    idNumber: idNum,
+                    phone: phone
+                };
+                localStorage.setItem("unesa_user", JSON.stringify(currentUser));
+                updateUserUI();
+                bootstrap.Modal.getInstance(document.getElementById("userAuthModal")).hide();
+                alert("Login Pemohon Berhasil!");
+            } else {
+                alert("Data tidak ditemukan! Silakan ke Tab 'Daftar Pemohon' lebih dulu.");
+            }
+        }
+
         function logoutUser() {
-            if (confirm("Apakah Anda yakin ingin logout pemohon?")) {
+            if (confirm("Logout dari akun pemohon?")) {
                 currentUser = null;
                 localStorage.removeItem("unesa_user");
                 updateUserUI();
             }
         }
 
-        // AKSI TOMBOL AJUKAN DI TABEL RUANGAN
+        // PENGAJUAN RUANG (SAVING TO SHEET 'Pengajuan')
         function openBookingModal(roomCode) {
             if (!currentUser) {
-                alert("Mohon lakukan Registrasi / Login Pemohon terlebih dahulu!");
+                alert("Silakan Login / Daftar Pemohon terlebih dahulu!");
                 new bootstrap.Modal(document.getElementById("userAuthModal")).show();
                 return;
             }
 
             document.getElementById("modalRoomCode").value = roomCode;
-            document.getElementById("modalApplicantName").value = `${currentUser.name} (${currentUser.idNumber} / ${currentUser.phone})`;
+            document.getElementById("modalApplicantName").value = `${currentUser.name} (${currentUser.idNumber})`;
             new bootstrap.Modal(document.getElementById("bookingModal")).show();
         }
 
-        // KIRIM FORM PENGAJUAN
         async function handleBookingSubmit(e) {
             e.preventDefault();
             const btnSubmit = document.getElementById("btnSubmitForm");
@@ -423,13 +592,10 @@
             const payload = {
                 timestamp: new Date().toLocaleString('id-ID'),
                 room: document.getElementById("modalRoomCode").value,
-                name: `${currentUser.name} (${currentUser.idNumber} - WA: ${currentUser.phone})`,
+                applicantId: currentUser.idNumber, // Relational Key ke Sheet Data User
                 date: document.getElementById("useDate").value,
                 timeSlot: document.getElementById("useTimeSlot").value,
-                purpose: document.getElementById("usePurpose").value,
-                fileName: currentUser.fileName,
-                fileMime: currentUser.fileMime,
-                fileData: currentUser.fileData
+                purpose: document.getElementById("usePurpose").value
             };
 
             try {
@@ -440,10 +606,10 @@
                     body: JSON.stringify(payload)
                 });
 
-                alert("Pengajuan berhasil dikirim! Silakan pantau status persetujuan di tabel bawah.");
+                alert("Pengajuan berhasil disimpan di Sheet Pengajuan!");
                 document.getElementById("bookingForm").reset();
                 bootstrap.Modal.getInstance(document.getElementById("bookingModal")).hide();
-                setTimeout(loadDataFromSheets, 2000);
+                setTimeout(fetchHistoryData, 2000);
             } catch (err) {
                 alert("Gagal mengirim pengajuan.");
             } finally {
@@ -452,155 +618,9 @@
             }
         }
 
-        // FITUR MODE ADMIN
-        function openAdminLoginModal() {
-            if (isAdmin) {
-                isAdmin = false;
-                document.getElementById("adminBadgeStatus").classList.add("d-none");
-                document.getElementById("thAdminAction").classList.add("d-none");
-                document.getElementById("btnAdminToggle").className = "btn btn-warning btn-sm fw-bold";
-                document.getElementById("btnAdminToggle").innerHTML = `<i class="fa-solid fa-user-shield me-1"></i> Mode Admin`;
-                renderRoomsTable(initialRooms);
-                loadDataFromSheets();
-                alert("Mode Admin Ditutup.");
-            } else {
-                new bootstrap.Modal(document.getElementById("adminModal")).show();
-            }
-        }
-
-        function verifyAdminPIN() {
-            const inputPin = document.getElementById("adminPinInput").value;
-            if (inputPin === ADMIN_PIN) {
-                isAdmin = true;
-                bootstrap.Modal.getInstance(document.getElementById("adminModal")).hide();
-                document.getElementById("adminPinInput").value = "";
-                document.getElementById("adminBadgeStatus").classList.remove("d-none");
-                document.getElementById("thAdminAction").classList.remove("d-none");
-                
-                const btnToggle = document.getElementById("btnAdminToggle");
-                btnToggle.className = "btn btn-danger btn-sm fw-bold";
-                btnToggle.innerHTML = `<i class="fa-solid fa-right-from-bracket me-1"></i> Keluar Admin`;
-                
-                renderRoomsTable(initialRooms);
-                loadDataFromSheets();
-                alert("Login Admin Berhasil! Tombol Persetujuan (ACC / Tolak) dan Edit Ruangan Aktif.");
-            } else {
-                alert("PIN Admin Salah!");
-            }
-        }
-
-        function renderRoomsTable(rooms) {
-            const tbody = document.getElementById("roomTableBody");
-            tbody.innerHTML = "";
-            let totalAc = 0;
-
-            rooms.forEach((room, index) => {
-                totalAc += parseInt(room.ac || 0);
-                const tr = document.createElement("tr");
-                let adminAction = isAdmin ? 
-                    `<button class="btn btn-sm btn-outline-warning text-dark ms-1" onclick="openEditRoomModal(${index})" title="Edit Detail Ruang"><i class="fa-solid fa-pen-to-square"></i> Edit</button>` : '';
-
-                tr.innerHTML = `
-                    <td>${room.no}</td>
-                    <td><span class="badge bg-secondary">Lantai ${room.lantai}</span></td>
-                    <td class="fw-bold">${room.code}</td>
-                    <td><span class="badge bg-info text-dark">${room.program}</span></td>
-                    <td>${room.kursi} Kursi | ${room.ac} AC</td>
-                    <td class="small text-danger fw-semibold">${room.note}</td>
-                    <td>
-                        <button class="btn btn-sm btn-outline-primary" onclick="openBookingModal('${room.code}')">
-                            <i class="fa-regular fa-calendar-plus me-1"></i> Ajukan
-                        </button>
-                        ${adminAction}
-                    </td>
-                `;
-                tbody.appendChild(tr);
-            });
-
-            document.getElementById("totalRuanganCount").innerText = rooms.length;
-            document.getElementById("totalAcCount").innerText = totalAc;
-        }
-
-        function openEditRoomModal(index) {
-            const room = initialRooms[index];
-            document.getElementById("editRoomIndex").value = index;
-            document.getElementById("editRoomCode").value = room.code;
-            document.getElementById("editRoomProgram").value = room.program;
-            document.getElementById("editRoomKursi").value = room.kursi;
-            document.getElementById("editRoomAc").value = room.ac;
-            document.getElementById("editRoomNote").value = room.note;
-            new bootstrap.Modal(document.getElementById("editRoomModal")).show();
-        }
-
-        function saveFullRoomData() {
-            const index = document.getElementById("editRoomIndex").value;
-            initialRooms[index].code = document.getElementById("editRoomCode").value;
-            initialRooms[index].program = document.getElementById("editRoomProgram").value;
-            initialRooms[index].kursi = document.getElementById("editRoomKursi").value;
-            initialRooms[index].ac = document.getElementById("editRoomAc").value;
-            initialRooms[index].note = document.getElementById("editRoomNote").value || "-";
-
-            localStorage.setItem('unesa_rooms', JSON.stringify(initialRooms));
-            renderRoomsTable(initialRooms);
-            bootstrap.Modal.getInstance(document.getElementById("editRoomModal")).hide();
-            alert("Detail & Kebijakan Ruang Berhasil Diperbarui!");
-        }
-
-        async function loadDataFromSheets() {
-            const historyBody = document.getElementById("bookingHistoryList");
-            try {
-                const response = await fetch(GOOGLE_SCRIPT_URL);
-                const result = await response.json();
-
-                if (result.status === "success" && result.data.length > 0) {
-                    document.getElementById("totalPengajuan").innerText = result.data.length;
-                    historyBody.innerHTML = "";
-                    
-                    result.data.reverse().forEach((item) => {
-                        let statusBadge = `<span class="badge bg-warning text-dark"><i class="fa-solid fa-hourglass-half me-1"></i>Menunggu</span>`;
-                        const statusLower = (item.status || "").toLowerCase();
-                        
-                        if (statusLower.includes("setuju") || statusLower.includes("acc")) {
-                            statusBadge = `<span class="badge bg-success"><i class="fa-solid fa-circle-check me-1"></i>Disetujui</span>`;
-                        } else if (statusLower.includes("tolak")) {
-                            statusBadge = `<span class="badge bg-danger"><i class="fa-solid fa-circle-xmark me-1"></i>Ditolak</span>`;
-                        }
-
-                        let fileLink = item.fileUrl ? `<a href="${item.fileUrl}" target="_blank" class="btn btn-xs btn-outline-info"><i class="fa-solid fa-id-card"></i> KTP/SIM</a>` : '<span class="text-muted">-</span>';
-
-                        let adminActionBtns = "";
-                        if (isAdmin) {
-                            adminActionBtns = `
-                                <td class="text-center">
-                                    <div class="btn-group btn-group-sm">
-                                        <button class="btn btn-success fw-bold" onclick="updateStatusByAdmin(${item.rowIndex}, 'Disetujui')" title="Setujui (ACC)"><i class="fa-solid fa-check me-1"></i> ACC</button>
-                                        <button class="btn btn-danger fw-bold" onclick="updateStatusByAdmin(${item.rowIndex}, 'Ditolak')" title="Tolak"><i class="fa-solid fa-xmark me-1"></i> Tolak</button>
-                                    </div>
-                                </td>
-                            `;
-                        }
-
-                        const tr = document.createElement("tr");
-                        tr.innerHTML = `
-                            <td class="small text-muted">${item.timestamp}</td>
-                            <td class="fw-bold text-primary">${item.room}</td>
-                            <td>${item.name}</td>
-                            <td><b>${item.date}</b> <br><small class="text-muted">${item.timeSlot}</small></td>
-                            <td>${item.purpose}</td>
-                            <td>${fileLink}</td>
-                            <td>${statusBadge}</td>
-                            ${adminActionBtns}
-                        `;
-                        historyBody.appendChild(tr);
-                    });
-                }
-            } catch (error) {
-                console.error(error);
-            }
-        }
-
+        // UPDATE STATUS PERSATUAN BARIS (SHEET 'Pengajuan')
         async function updateStatusByAdmin(rowIndex, newStatus) {
-            if (!confirm(`Apakah Anda yakin ingin me-status pengajuan ini menjadi '${newStatus}'?`)) return;
+            if (!confirm(`Ubah status pengajuan ini menjadi '${newStatus}'?`)) return;
 
             try {
                 await fetch(GOOGLE_SCRIPT_URL, {
@@ -614,10 +634,71 @@
                     })
                 });
 
-                alert(`Status berhasil diperbarui menjadi: ${newStatus}`);
-                setTimeout(loadDataFromSheets, 1500);
+                alert(`Status berhasil diubah menjadi: ${newStatus}`);
+                setTimeout(fetchHistoryData, 1500);
             } catch (e) {
-                alert("Gagal mengubah status.");
+                alert("Gagal memperbarui status.");
+            }
+        }
+
+        // MODE ADMIN TOGGLE
+        function toggleAdminMode() {
+            if (isAdmin) {
+                isAdmin = false;
+                document.getElementById("userAreaNavbar").classList.remove("d-none");
+                document.getElementById("adminBadgeStatus").classList.add("d-none");
+                document.getElementById("thAdminAction").classList.add("d-none");
+                document.getElementById("btnChangeAdminPass").classList.add("d-none");
+                
+                const btnToggle = document.getElementById("btnAdminToggle");
+                btnToggle.className = "btn btn-warning btn-sm fw-bold";
+                btnToggle.innerHTML = `<i class="fa-solid fa-user-shield me-1"></i> Mode Admin`;
+
+                renderRoomsTable(masterRooms);
+                fetchHistoryData();
+                alert("Keluar dari Mode Admin.");
+            } else {
+                new bootstrap.Modal(document.getElementById("adminModal")).show();
+            }
+        }
+
+        function verifyAdminPIN() {
+            const inputPin = document.getElementById("adminPinInput").value;
+            if (inputPin === adminPin) {
+                isAdmin = true;
+                bootstrap.Modal.getInstance(document.getElementById("adminModal")).hide();
+                document.getElementById("adminPinInput").value = "";
+
+                document.getElementById("userAreaNavbar").classList.add("d-none");
+                document.getElementById("adminBadgeStatus").classList.remove("d-none");
+                document.getElementById("thAdminAction").classList.remove("d-none");
+                document.getElementById("btnChangeAdminPass").classList.remove("d-none");
+
+                const btnToggle = document.getElementById("btnAdminToggle");
+                btnToggle.className = "btn btn-danger btn-sm fw-bold";
+                btnToggle.innerHTML = `<i class="fa-solid fa-right-from-bracket me-1"></i> Keluar Admin`;
+
+                renderRoomsTable(masterRooms);
+                fetchHistoryData();
+                alert("Mode Admin Aktif!");
+            } else {
+                alert("PIN Admin Salah!");
+            }
+        }
+
+        function openChangePassModal() {
+            new bootstrap.Modal(document.getElementById("changePassModal")).show();
+        }
+
+        function saveNewAdminPin() {
+            const newPin = document.getElementById("newAdminPin").value;
+            if (newPin.trim().length >= 4) {
+                adminPin = newPin;
+                localStorage.setItem("unesa_admin_pin", adminPin);
+                bootstrap.Modal.getInstance(document.getElementById("changePassModal")).hide();
+                alert("PIN Admin Berhasil Diperbarui!");
+            } else {
+                alert("PIN minimal 4 Karakter!");
             }
         }
 
@@ -625,8 +706,8 @@
             const searchVal = document.getElementById("searchInput").value.toLowerCase();
             const programVal = document.getElementById("filterPeruntukan").value;
 
-            const filtered = initialRooms.filter((r) => {
-                const matchSearch = r.code.toLowerCase().includes(searchVal) || r.note.toLowerCase().includes(searchVal);
+            const filtered = masterRooms.filter((r) => {
+                const matchSearch = String(r.code).toLowerCase().includes(searchVal) || String(r.note).toLowerCase().includes(searchVal);
                 const matchProgram = programVal === "" || r.program === programVal;
                 return matchSearch && matchProgram;
             });
@@ -636,7 +717,7 @@
         function resetFilter() {
             document.getElementById("searchInput").value = "";
             document.getElementById("filterPeruntukan").value = "";
-            renderRoomsTable(initialRooms);
+            renderRoomsTable(masterRooms);
         }
     </script>
 </body>
