@@ -431,17 +431,18 @@
 
             let aksiAdminHtml = "";
         if (currentUser && currentUser.role === "admin") {
-            // 💬 TOMBOL WA MANUAL UNTUK ADMIN
-            let btnWaHtml = "";
-            if (b.hp && b.hp !== "-" && b.hp !== "") {
-                let cleanHp = b.hp.toString().replace(/[^0-9]/g, '');
-                if (cleanHp.startsWith("0")) cleanHp = "62" + cleanHp.substring(1);
-                
-                let msgWa = encodeURIComponent(`Yth. Bapak/Ibu/Saudara *${b.pemohon}*,\n\nMengenai pengajuan peminjaman ruang *${b.roomCode}* untuk tanggal *${b.tanggal} (${b.jam})* dengan status: *${b.status.toUpperCase()}*.\n\nDemikian informasi ini disampaikan. Terima kasih!\n- Admin SIM-RUANG FH UNESA`);
-                let urlWaDirect = `https://api.whatsapp.com/send?phone=${cleanHp}&text=${msgWa}`;
-                
-                btnWaHtml = `<a href="${urlWaDirect}" target="_blank" style="text-decoration:none; display:inline-block; margin-top:3px; padding:3px 8px; background-color:#25D366; color:white; border-radius:4px; font-size:11px; font-weight:bold;">💬 Chat WA</a>`;
-            }
+            // Tentukan nomor HP (jika kosong/tidak ada, pakai string kosong)
+            let rawHp = (b.hp && b.hp !== "-") ? b.hp.toString() : "";
+            let cleanHp = rawHp.replace(/[^0-9]/g, '');
+            if (cleanHp.startsWith("0")) cleanHp = "62" + cleanHp.substring(1);
+
+            // Draft Pesan WA
+            let msgWa = encodeURIComponent(`Yth. Bapak/Ibu/Saudara *${b.pemohon}*,\n\nMengenai pengajuan peminjaman ruang *${b.roomCode}* untuk tanggal *${b.tanggal} (${b.jam})* dengan status: *${b.status.toUpperCase()}*.\n\nDemikian informasi ini disampaikan. Terima kasih!\n- Admin SIM-RUANG FH UNESA`);
+            
+            // Link WA (jika hp ada -> langsung ke WA pemohon; jika tidak -> buka wa.me umum)
+            let urlWaDirect = cleanHp ? `https://api.whatsapp.com/send?phone=${cleanHp}&text=${msgWa}` : `https://wa.me/`;
+
+            let btnWaHtml = `<a href="${urlWaDirect}" target="_blank" style="text-decoration:none; display:inline-block; margin-top:4px; padding:3px 8px; background-color:#25D366; color:white; border-radius:4px; font-size:11px; font-weight:bold;">💬 Chat WA</a>`;
 
             aksiAdminHtml = `
                 <td>
