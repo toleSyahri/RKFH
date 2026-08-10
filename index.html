@@ -3,60 +3,51 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistem Peminjaman Ruang FH UNESA</title>
+    <title>Sistem Informasi Manajemen Ruang (SIM-RUANG) FH UNESA</title>
     <style>
-        body { font-family: Arial, sans-serif; background-color: #f4f6f9; margin: 0; padding: 20px; color: #333; }
-        .container { max-width: 1100px; margin: auto; background: white; padding: 25px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-        h1, h2, h3 { color: #003366; text-align: center; margin-bottom: 20px; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f0f2f5; margin: 0; padding: 20px; color: #333; }
+        .container { max-width: 1150px; margin: auto; background: white; padding: 25px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); }
+        h1, h2, h3 { color: #003366; text-align: center; }
         
-        /* Card Login, Register & Form */
-        .card { background: #eef2f7; padding: 20px; border-radius: 6px; margin-bottom: 20px; border-left: 5px solid #003366; }
-        .card-admin { background: #fff8e7; border-left: 5px solid #f0ad4e; }
-        .form-group { margin-bottom: 15px; }
+        .card { background: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 20px; border-left: 5px solid #003366; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .card-vip { background: #fff8e7; border-left: 5px solid #d9534f; }
+        .form-group { margin-bottom: 12px; }
         .form-row { display: flex; gap: 10px; }
         .form-row .form-group { flex: 1; }
         label { display: block; font-weight: bold; margin-bottom: 5px; font-size: 13px; }
-        input, select, button { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
-        button { background-color: #003366; color: white; font-weight: bold; cursor: pointer; border: none; margin-top: 10px; }
+        input, select, button { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; }
+        button { background-color: #003366; color: white; font-weight: bold; cursor: pointer; border: none; margin-top: 8px; }
         button:hover { background-color: #002244; }
-        .btn-success { background-color: #5cb85c; }
-        .btn-success:hover { background-color: #4cae4c; }
-        .btn-warning { background-color: #f0ad4e; color: white; }
-        .btn-warning:hover { background-color: #ec971f; }
-        .btn-danger { background-color: #d9534f; margin-top: 0; }
-        .btn-danger:hover { background-color: #c9302c; }
+        .btn-success { background-color: #28a745; } .btn-success:hover { background-color: #218838; }
+        .btn-warning { background-color: #ffc107; color: #111; } .btn-warning:hover { background-color: #e0a800; }
+        .btn-danger { background-color: #dc3545; } .btn-danger:hover { background-color: #c82333; }
+        .btn-vip { background-color: #d9534f; } .btn-vip:hover { background-color: #c9302c; }
         .btn-sm { width: auto; padding: 4px 8px; font-size: 12px; margin: 2px; display: inline-block; }
         
-        /* Tab Navigasi Auth */
         .auth-tabs { display: flex; gap: 10px; margin-bottom: 15px; }
-        .auth-tabs button { margin-top: 0; background: #ccc; color: #333; }
+        .auth-tabs button { margin-top: 0; background: #e0e0e0; color: #333; }
         .auth-tabs button.active { background: #003366; color: white; }
 
-        /* Tabel */
         table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 13px; }
-        th, td { border: 1px solid #dddddd; text-align: center; padding: 8px; }
+        th, td { border: 1px solid #dee2e6; text-align: center; padding: 10px; }
         th { background-color: #003366; color: white; }
-        tr:nth-child(even) { background-color: #f9f9f9; }
+        tr:nth-child(even) { background-color: #f8f9fa; }
         
-        /* Status Badge */
-        .status-diproses { background-color: #f0ad4e; color: white; padding: 3px 8px; border-radius: 4px; font-size: 12px; }
-        .status-disetujui { background-color: #5cb85c; color: white; padding: 3px 8px; border-radius: 4px; font-size: 12px; }
-        .status-ditolak { background-color: #d9534f; color: white; padding: 3px 8px; border-radius: 4px; font-size: 12px; }
+        .status-diproses { background-color: #ffc107; color: #212529; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; }
+        .status-disetujui { background-color: #28a745; color: white; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; }
+        .status-ditolak { background-color: #dc3545; color: white; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; }
         
-        /* Modal Popup Edit */
-        .modal { display: none; position: fixed; z-index: 100; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); }
-        .modal-content { background: white; margin: 5% auto; padding: 20px; border-radius: 8px; width: 90%; max-width: 500px; }
-
-        .contact-info { background: #e8f4f8; padding: 10px; border-radius: 4px; margin-top: 15px; font-size: 13px; text-align: center; }
+        .contact-info { background: #e8f4f8; padding: 12px; border-radius: 6px; margin-top: 20px; font-size: 13px; text-align: center; }
         .hidden { display: none; }
+        .loading { text-align: center; color: #666; font-style: italic; margin: 10px 0; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>Sistem Peminjaman Ruang Perkuliahan<br>Fakultas Hukum UNESA</h1>
+    <h1>Sistem Informasi Manajemen Ruang (SIM-RUANG)<br>Fakultas Hukum UNESA</h1>
 
-    <!-- 1. HALAMAN AUTHENTICATION (LOGIN & REGISTRASI) -->
+    <!-- SECTION 1: AUTHENTICATION (LOGIN & REGISTRASI) -->
     <div id="section-auth" class="card">
         <div class="auth-tabs">
             <button id="btn-tab-login" class="active" onclick="switchAuthTab('login')">Login System</button>
@@ -65,161 +56,155 @@
 
         <!-- FORM LOGIN -->
         <div id="form-login-container">
-            <h2>Login User / Admin</h2>
-            <form id="form-login" onsubmit="event.preventDefault(); prosesLogin();">
+            <h2>Login Pengguna / Admin</h2>
+            <form onsubmit="event.preventDefault(); prosesLogin();">
                 <div class="form-group">
-                    <label>Username / Email</label>
-                    <input type="text" id="login-username" placeholder="Masukkan username/email" required>
+                    <label>Username / Email / NIM / NIP</label>
+                    <input type="text" id="login-username" placeholder="Masukkan ID Login Anda" required>
                 </div>
                 <div class="form-group">
                     <label>Password</label>
                     <input type="password" id="login-password" placeholder="Masukkan password" required>
                 </div>
-                <button type="submit">Login</button>
+                <button type="submit">Login ke Sistem</button>
             </form>
-            <div style="font-size: 12px; margin-top: 15px; color: #666;">
-                <strong>Catatan Login Demo:</strong><br>
-                • Admin Default: <i>syahrisyahri@unesa.ac.id</i> | Pass: <i>admin123</i><br>
-                • Pengguna Default: <i>user</i> | Pass: <i>user123</i> (Atau silahkan registrasi akun baru)
+            <div style="font-size: 12px; margin-top: 15px; color: #555; background: #e9ecef; padding: 10px; border-radius: 4px;">
+                <strong>Catatan Akses Admin Bypass:</strong><br>
+                • Admin Master: <i>syahrisyahri@unesa.ac.id</i> | Pass: <i>admin123</i>
             </div>
         </div>
 
         <!-- FORM REGISTRASI -->
         <div id="form-register-container" class="hidden">
             <h2>Pendaftaran Akun Pengguna Baru</h2>
-            <form id="form-register" onsubmit="event.preventDefault(); prosesRegistrasi();">
+            <form onsubmit="event.preventDefault(); prosesRegistrasi();">
                 <div class="form-group">
                     <label>Nama Lengkap</label>
                     <input type="text" id="reg-nama" placeholder="Contoh: Ahmad Subagyo" required>
                 </div>
-                <div class="form-group">
-                    <label>NIM / NIP / NIK</label>
-                    <input type="text" id="reg-nim" placeholder="Masukkan Nomor Induk" required>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Asal / Prodi</label>
+                        <input type="text" id="reg-prodi" placeholder="Contoh: S1 Ilmu Hukum" required>
+                    </div>
+                    <div class="form-group">
+                        <label>NIM / NIP / NIK</label>
+                        <input type="text" id="reg-nim" placeholder="Nomor Induk" required>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label>No. WhatsApp Active</label>
-                    <input type="text" id="reg-wa" placeholder="08xxxxxxxxxx" required>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>No. WhatsApp Active</label>
+                        <input type="text" id="reg-wa" placeholder="08xxxxxxxxxx" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Email UNESA / Umum</label>
+                        <input type="email" id="reg-email" placeholder="email@unesa.ac.id" required>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label>Username / Email</label>
-                    <input type="text" id="reg-username" placeholder="Buat username unik" required>
-                </div>
-                <div class="form-group">
-                    <label>Password</label>
-                    <input type="password" id="reg-password" placeholder="Buat password" required>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Nama Pengguna (Username)</label>
+                        <input type="text" id="reg-username" placeholder="Buat username unik" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Password</label>
+                        <input type="password" id="reg-password" placeholder="Buat password" required>
+                    </div>
                 </div>
                 <button type="submit" class="btn-success">Daftarkan Akun Saya</button>
             </form>
         </div>
     </div>
 
-    <!-- 2. DASHBOARD UTAMA -->
+    <!-- SECTION 2: DASHBOARD UTAMA -->
     <div id="section-dashboard" class="hidden">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
             <div>Selamat datang, <strong id="user-display"></strong> (<span id="role-display"></span>)</div>
-            <div>
-                <button onclick="resetToDefaultData()" class="btn-warning btn-sm" style="padding: 8px 12px; margin-right: 5px;">Reset Data Default</button>
-                <button onclick="logout()" class="btn-danger btn-sm" style="padding: 8px 15px;">Logout</button>
-            </div>
+            <button onclick="logout()" class="btn-danger btn-sm" style="padding: 8px 15px;">Logout</button>
         </div>
 
-        <!-- FORM PINJAM (Khusus User Biasa) -->
-        <div id="section-form-pinjam" class="card hidden">
+        <!-- FORM PINJAM REGULER (USER & ADMIN) -->
+        <div id="section-form-pinjam" class="card">
             <h3>Form Pengajuan Peminjaman Ruangan</h3>
-            <form id="form-pinjam" onsubmit="event.preventDefault(); ajukanPinjaman();">
+            <form onsubmit="event.preventDefault(); ajukanPinjaman();">
                 <div class="form-group">
                     <label>Pilih Ruangan</label>
                     <select id="pinjam-ruang" required></select>
                 </div>
-                <div class="form-group">
-                    <label>Tanggal Peminjaman</label>
-                    <input type="date" id="pinjam-tanggal" required>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Tanggal Peminjaman</label>
+                        <input type="date" id="pinjam-tanggal" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Jam Mulai</label>
+                        <input type="time" id="pinjam-jam-mulai" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Jam Selesai</label>
+                        <input type="time" id="pinjam-jam-selesai" required>
+                    </div>
                 </div>
                 <div class="form-group">
-                    <label>Sesi / Waktu Layanan</label>
-                    <select id="pinjam-sesi" required>
-                        <option value="07:00 - 08:40">07:00 - 08:40</option>
-                        <option value="08:40 - 10:20">08:40 - 10:20</option>
-                        <option value="10:20 - 12:00">10:20 - 12:00</option>
-                        <option value="12:00 - 13:50">12:00 - 13:50</option>
-                        <option value="13:50 - 15:30">13:50 - 15:30</option>
-                        <option value="15:30 - 17:10">15:30 - 17:10</option>
-                    </select>
+                    <label>Keperluan / Agenda Kegiatan</label>
+                    <input type="text" id="pinjam-keperluan" placeholder="Contoh: Kuliah S1 / Semhas / Rapat UKM" required>
                 </div>
-                <div class="form-group">
-                    <label>Keperluan / Kegiatan</label>
-                    <input type="text" id="pinjam-keperluan" placeholder="Contoh: Kuliah S1 / Semhas / Rapat" required>
-                </div>
-                <button type="submit">Kirim Pengajuan</button>
+                <button type="submit">Kirim Pengajuan Peminjaman</button>
             </form>
         </div>
 
-        <!-- FORM TAMBAH RUANG BARU (Khusus Admin) -->
-        <div id="section-admin-tambah-ruang" class="card card-admin hidden">
-            <h3>Tambah Ruangan Perkuliahan Baru (Admin)</h3>
-            <form onsubmit="event.preventDefault(); tambahRuanganBaru();">
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>Kode Ruang</label>
-                        <input type="text" id="add-kode" placeholder="Misal: F3.02.07" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Lantai</label>
-                        <input type="number" id="add-lantai" value="1" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Jumlah Kursi</label>
-                        <input type="number" id="add-kursi" value="40" required>
-                    </div>
+        <!-- FORM BOOKING KILAT PIMPINAN (KHUSUS ADMIN) -->
+        <div id="section-admin-vip" class="card card-vip hidden">
+            <h3 style="color: #d9534f;">⚡ Booking Kilat Pimpinan (VIP & Agenda Dekanat)</h3>
+            <p style="font-size: 12px; margin-top: -10px; color: #666; text-align: center;">Instruksi Komandan / Pimpinan - Langsung Terkunci & Otomatis Terdisetujui</p>
+            <form onsubmit="event.preventDefault(); ajukanBookingVip();">
+                <div class="form-group">
+                    <label>Pilih Ruangan</label>
+                    <select id="vip-ruang" required></select>
+                </div>
+                <div class="form-group">
+                    <label>Instruksi Pimpinan / Pemohon VIP</label>
+                    <input type="text" id="vip-pemohon" placeholder="Contoh: Dekan / Wakil Dekan I / Agenda Dekanat" required>
                 </div>
                 <div class="form-row">
                     <div class="form-group">
-                        <label>Smart TV</label>
-                        <input type="number" id="add-tv" value="1" required>
+                        <label>Tanggal Peminjaman</label>
+                        <input type="date" id="vip-tanggal" required>
                     </div>
                     <div class="form-group">
-                        <label>AC</label>
-                        <input type="number" id="add-ac" value="2" required>
+                        <label>Jam Mulai</label>
+                        <input type="time" id="vip-jam-mulai" required>
                     </div>
                     <div class="form-group">
-                        <label>Stop Kontak</label>
-                        <input type="number" id="add-sk" value="5" required>
+                        <label>Jam Selesai</label>
+                        <input type="time" id="vip-jam-selesai" required>
                     </div>
                 </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>Papan Tulis</label>
-                        <input type="number" id="add-pt" value="1" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Peruntukan</label>
-                        <select id="add-peruntukan">
-                            <option value="S1">S1</option>
-                            <option value="S2">S2</option>
-                            <option value="Umum">Umum</option>
-                        </select>
-                    </div>
+                <div class="form-group">
+                    <label>Keperluan Agenda</label>
+                    <input type="text" id="vip-keperluan" placeholder="Contoh: Rapat Koordinasi Senat Fakultas" required>
                 </div>
-                <button type="submit" class="btn-success">Simpan Ruangan Baru</button>
+                <button type="submit" class="btn-vip">Eksekusi & Kunci Ruangan Sekarang</button>
             </form>
         </div>
 
-        <!-- TABEL DAFTAR RUANGAN -->
-        <h3>Daftar Fasilitas Ruang Perkuliahan FH UNESA 2026</h3>
+        <!-- TABEL RUANG -->
+        <h3>Daftar Fasilitas Ruang Perkuliahan FH UNESA</h3>
+        <div id="loading-ruangan" class="loading">Memuat data ruangan dari Google Sheets...</div>
         <div style="overflow-x:auto;">
             <table>
                 <thead>
                     <tr>
-                        <th>Kode Ruang</th>
                         <th>Lantai</th>
+                        <th>Kode Ruang</th>
                         <th>Kursi</th>
                         <th>TV Smart</th>
                         <th>AC</th>
                         <th>Stop Kontak</th>
                         <th>Papan Tulis</th>
-                        <th>Peruntukan</th>
                         <th>Waktu Layanan</th>
-                        <th id="th-aksi-ruang" class="hidden">Aksi Kelola Ruang</th>
+                        <th>Program</th>
                     </tr>
                 </thead>
                 <tbody id="tabel-ruangan"></tbody>
@@ -227,178 +212,59 @@
         </div>
 
         <!-- TABEL STATUS RIWAYAT & PERSETUJUAN PINJAMAN -->
-        <h3 style="margin-top: 30px;">Daftar & Status Peminjaman</h3>
+        <h3 style="margin-top: 30px;">Daftar Status & Persetujuan Peminjaman</h3>
+        <div id="loading-pinjaman" class="loading">Memuat data peminjaman dari Google Sheets...</div>
         <div style="overflow-x:auto;">
             <table>
                 <thead>
                     <tr>
-                        <th>Pemohon (NIM/WA)</th>
-                        <th>Ruangan</th>
-                        <th>Tanggal</th>
-                        <th>Sesi</th>
+                        <th>Waktu Input</th>
+                        <th>Kode Ruang</th>
+                        <th>Nama Pemohon</th>
+                        <th>NIM / NIP</th>
                         <th>Keperluan</th>
+                        <th>Tanggal & Jam</th>
                         <th>Status</th>
-                        <th id="th-aksi-pinjaman" class="hidden">Kelola & Persetujuan Admin</th>
+                        <th id="th-aksi-pinjaman" class="hidden">Aksi Admin & Relokasi</th>
                     </tr>
                 </thead>
                 <tbody id="tabel-pinjaman"></tbody>
             </table>
         </div>
 
-        <!-- INFO ADMIN/PETUGAS -->
+        <!-- FOOTER CONTACT -->
         <div class="contact-info">
             <strong>Petugas Pengelola / Admin:</strong> Syahri (syahrisyahri@unesa.ac.id) | <strong>WA:</strong> 081331382680
         </div>
     </div>
 </div>
 
-<!-- MODAL POPUP EDIT RUANGAN -->
-<div id="modal-edit-ruang" class="modal">
-    <div class="modal-content">
-        <h3>Edit Data Ruangan</h3>
-        <form onsubmit="event.preventDefault(); simpanEditRuangan();">
-            <input type="hidden" id="edit-ruang-index">
-            <div class="form-group">
-                <label>Kode Ruang</label>
-                <input type="text" id="edit-kode" required>
-            </div>
-            <div class="form-row">
-                <div class="form-group"><label>Lantai</label><input type="number" id="edit-lantai" required></div>
-                <div class="form-group"><label>Kursi</label><input type="number" id="edit-kursi" required></div>
-            </div>
-            <div class="form-row">
-                <div class="form-group"><label>Smart TV</label><input type="number" id="edit-tv" required></div>
-                <div class="form-group"><label>AC</label><input type="number" id="edit-ac" required></div>
-                <div class="form-group"><label>Stop Kontak</label><input type="number" id="edit-sk" required></div>
-            </div>
-            <div class="form-row">
-                <div class="form-group"><label>Papan Tulis</label><input type="number" id="edit-pt" required></div>
-                <div class="form-group">
-                    <label>Peruntukan</label>
-                    <select id="edit-peruntukan">
-                        <option value="S1">S1</option>
-                        <option value="S2">S2</option>
-                        <option value="Umum">Umum</option>
-                    </select>
-                </div>
-            </div>
-            <button type="submit" class="btn-success">Simpan Perubahan</button>
-            <button type="button" onclick="tutupModal('modal-edit-ruang')" class="btn-danger">Batal</button>
-        </form>
-    </div>
-</div>
-
-<!-- MODAL POPUP EDIT PINJAMAN -->
-<div id="modal-edit-pinjaman" class="modal">
-    <div class="modal-content">
-        <h3>Edit Data Peminjaman</h3>
-        <form onsubmit="event.preventDefault(); simpanEditPinjaman();">
-            <input type="hidden" id="edit-pinjam-id">
-            <div class="form-group">
-                <label>Nama Pemohon</label>
-                <input type="text" id="edit-pemohon" required>
-            </div>
-            <div class="form-group">
-                <label>Pilih Ruangan</label>
-                <select id="edit-pinjam-ruang" required></select>
-            </div>
-            <div class="form-group">
-                <label>Tanggal Peminjaman</label>
-                <input type="date" id="edit-pinjam-tanggal" required>
-            </div>
-            <div class="form-group">
-                <label>Sesi / Jam</label>
-                <select id="edit-pinjam-sesi" required>
-                    <option value="07:00 - 08:40">07:00 - 08:40</option>
-                    <option value="08:40 - 10:20">08:40 - 10:20</option>
-                    <option value="10:20 - 12:00">10:20 - 12:00</option>
-                    <option value="12:00 - 13:50">12:00 - 13:50</option>
-                    <option value="13:50 - 15:30">13:50 - 15:30</option>
-                    <option value="15:30 - 17:10">15:30 - 17:10</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label>Keperluan</label>
-                <input type="text" id="edit-pinjam-keperluan" required>
-            </div>
-            <button type="submit" class="btn-success">Update Peminjaman</button>
-            <button type="button" onclick="tutupModal('modal-edit-pinjaman')" class="btn-danger">Batal</button>
-        </form>
-    </div>
-</div>
-
 <script>
-    // DATA DEFAULT MASTER RUANG
-    const initialRuangan = [
-        { kode: "F4.01.06", lantai: 1, kursi: 40, tv: 1, ac: 1, sk: 6, pt: 0, peruntukan: "S2", jam: "07:00 - 17:10" },
-        { kode: "F4.01.05", lantai: 1, kursi: 30, tv: 1, ac: 2, sk: 6, pt: 0, peruntukan: "S2", jam: "07:00 - 17:10" },
-        { kode: "F4.01.02", lantai: 1, kursi: 19, tv: 1, ac: 1, sk: 3, pt: 0, peruntukan: "S2", jam: "07:00 - 17:10" },
-        { kode: "F3.01.03B Semhas", lantai: 1, kursi: 29, tv: 1, ac: 1, sk: 3, pt: 1, peruntukan: "Umum", jam: "07:00 - 17:10" },
-        { kode: "F3.01.03A Sempro", lantai: 1, kursi: 40, tv: 1, ac: 1, sk: 2, pt: 0, peruntukan: "Umum", jam: "07:00 - 17:10" },
-        { kode: "F3.01.02B Rapat", lantai: 1, kursi: 32, tv: 1, ac: 1, sk: 7, pt: 0, peruntukan: "Umum", jam: "07:00 - 17:10" },
-        { kode: "F3.02.06", lantai: 2, kursi: 51, tv: 1, ac: 2, sk: 2, pt: 1, peruntukan: "S1", jam: "07:00 - 17:10" },
-        { kode: "F3.02.05", lantai: 2, kursi: 46, tv: 1, ac: 1, sk: 5, pt: 1, peruntukan: "S1", jam: "07:00 - 17:10" },
-        { kode: "F3.02.04", lantai: 2, kursi: 69, tv: 1, ac: 2, sk: 7, pt: 1, peruntukan: "S1", jam: "07:00 - 17:10" },
-        { kode: "F3.02.03", lantai: 2, kursi: 49, tv: 1, ac: 2, sk: 6, pt: 1, peruntukan: "S1", jam: "07:00 - 17:10" },
-        { kode: "F3.02.02", lantai: 2, kursi: 50, tv: 1, ac: 1, sk: 5, pt: 1, peruntukan: "S1", jam: "07:00 - 17:10" },
-        { kode: "F3.02.01", lantai: 2, kursi: 49, tv: 1, ac: 2, sk: 1, pt: 1, peruntukan: "S1", jam: "07:00 - 17:10" },
-        { kode: "F2.02.04", lantai: 2, kursi: 56, tv: 1, ac: 2, sk: 10, pt: 1, peruntukan: "S1", jam: "07:00 - 17:10" },
-        { kode: "F2.02.03", lantai: 2, kursi: 58, tv: 1, ac: 2, sk: 4, pt: 1, peruntukan: "S1", jam: "07:00 - 17:10" },
-        { kode: "F2.02.02", lantai: 2, kursi: 58, tv: 1, ac: 2, sk: 4, pt: 1, peruntukan: "S1", jam: "07:00 - 17:10" },
-        { kode: "F2.02.01", lantai: 2, kursi: 58, tv: 1, ac: 3, sk: 10, pt: 1, peruntukan: "S1", jam: "07:00 - 17:10" },
-        { kode: "F1.02.03", lantai: 2, kursi: 88, tv: 1, ac: 2, sk: 9, pt: 1, peruntukan: "S1", jam: "07:00 - 17:10" },
-        { kode: "F1.02.02", lantai: 2, kursi: 67, tv: 1, ac: 2, sk: 5, pt: 1, peruntukan: "S1", jam: "07:00 - 17:10" },
-        { kode: "F1.02.01", lantai: 2, kursi: 84, tv: 1, ac: 2, sk: 5, pt: 1, peruntukan: "S1", jam: "07:00 - 17:10" }
-    ];
-
-    // DATA DEFAULT HISTORI PENGAJUAN (SESUAI FOTO KAMU)
-    const initialPinjaman = [
-        {
-            id: 1,
-            pemohon: "Pengguna Umum (user)",
-            ruang: "F4.01.06",
-            tanggal: "2026-08-11",
-            sesi: "10:20 - 12:00",
-            keperluan: "kuliah",
-            status: "Diproses"
-        }
-    ];
-
-    // INISIALISASI STORAGE BROWSER
-    let dataRuangan = JSON.parse(localStorage.getItem('unesa_ruangan')) || initialRuangan;
-    let listUsers = JSON.parse(localStorage.getItem('unesa_users')) || [];
-    
-    // BACA / SET HISTORI PENGAJUAN (Bila kosong/null, otomatis terisi data bawaan)
-    let storedPinjaman = JSON.parse(localStorage.getItem('unesa_pinjaman'));
-    let listPinjaman = (storedPinjaman && storedPinjaman.length > 0) ? storedPinjaman : initialPinjaman;
+    // =========================================================================
+    // PASTE URL WEB APP GOOGLE APPS SCRIPT (.GS) KAMU DI BAWAH INI
+    // =========================================================================
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwaJDJuSi6F6Z-lQycc3c3iW570d3b_zGqmgDRm-tbdeUuLXpTBGpqcgIKSmiUiOjtY/exec"; 
 
     let currentUser = null;
+    let dataRuanganGlobal = [];
+    let dataPinjamanGlobal = [];
 
-    window.onload = function() {
-        simpanDataStorage();
-        renderTabelRuangan();
-        populateSelectRuangan();
-    };
+    // Helper Fungsi Eksekusi Request JSONP (Anti CORS)
+    function executeJSONP(url, callbackName) {
+        // Hapus script lama jika ada
+        const oldScript = document.getElementById('jsonp-' + callbackName);
+        if (oldScript) oldScript.remove();
 
-    function simpanDataStorage() {
-        localStorage.setItem('unesa_ruangan', JSON.stringify(dataRuangan));
-        localStorage.setItem('unesa_users', JSON.stringify(listUsers));
-        localStorage.setItem('unesa_pinjaman', JSON.stringify(listPinjaman));
+        const script = document.createElement('script');
+        script.id = 'jsonp-' + callbackName;
+        script.src = url + (url.includes('?') ? '&' : '?') + 'callback=' + callbackName;
+        script.onerror = function() {
+            alert('Gagal terhubung ke Google Sheets API! Pastikan SCRIPT_URL diisi dengan benar.');
+        };
+        document.body.appendChild(script);
     }
 
-    // FUNGSI RESET JIKA INGIN MENGEMBALIKAN DATA DENGAN AMAN
-    function resetToDefaultData() {
-        if(confirm("Apakah Anda yakin ingin mengembalikan histori peminjaman ke data awal demo?")) {
-            listPinjaman = [...initialPinjaman];
-            dataRuangan = [...initialRuangan];
-            simpanDataStorage();
-            renderTabelRuangan();
-            renderTabelPinjaman();
-            alert("Data berhasil dipulihkan!");
-        }
-    }
-
-    /* --- AUTHENTICATION & TAB --- */
+    /* --- SWITCH TAB REGISTRASI / LOGIN --- */
     function switchAuthTab(tab) {
         if(tab === 'login') {
             document.getElementById("btn-tab-login").classList.add("active");
@@ -413,304 +279,243 @@
         }
     }
 
-    function prosesRegistrasi() {
-        const nama = document.getElementById("reg-nama").value;
-        const nim = document.getElementById("reg-nim").value;
-        const wa = document.getElementById("reg-wa").value;
-        const username = document.getElementById("reg-username").value;
-        const pass = document.getElementById("reg-password").value;
+    /* --- PROSES LOGIN --- */
+    function prosesLogin() {
+        const user = document.getElementById("login-username").value.trim();
+        const pass = document.getElementById("login-password").value.trim();
 
-        const adaUser = listUsers.find(u => u.username === username);
-        if(adaUser) {
-            alert("Username/Email sudah terdaftar. Gunakan username lain!");
+        // Bypass khusus Admin Master
+        if (user === "syahrisyahri@unesa.ac.id" && pass === "admin123") {
+            currentUser = { nama: "Syahri (Admin Master)", role: "admin", nim: "NIP.19830807" };
+            masukDashboard();
             return;
         }
 
-        listUsers.push({ nama, nim, wa, username, pass, role: "pengguna" });
-        simpanDataStorage();
-        alert("Pendaftaran Berhasil! Silakan Login menggunakan akun baru Anda.");
-        document.getElementById("form-register").reset();
-        switchAuthTab('login');
+        // Login Reguler via Google Sheets
+        const url = `${SCRIPT_URL}?action=loginUser&username=${encodeURIComponent(user)}&password=${encodeURIComponent(pass)}`;
+        executeJSONP(url, 'cb_login');
     }
 
-    function prosesLogin() {
-        const user = document.getElementById("login-username").value;
-        const pass = document.getElementById("login-password").value;
-
-        // Cek Admin Default
-        if (user === "syahrisyahri@unesa.ac.id" && pass === "admin123") {
-            currentUser = { username: user, role: "admin", nama: "Admin Syahri" };
-        } 
-        // Cek Pengguna Default
-        else if (user === "user" && pass === "user123") {
-            currentUser = { username: user, role: "pengguna", nama: "Pengguna Umum" };
-        } 
-        // Cek Pengguna Hasil Registrasi
-        else {
-            const userTerdaftar = listUsers.find(u => u.username === user && u.pass === pass);
-            if (userTerdaftar) {
-                currentUser = { username: userTerdaftar.username, role: "pengguna", nama: userTerdaftar.nama };
-            } else {
-                alert("Username atau Password salah!");
-                return;
-            }
+    function cb_login(response) {
+        if (response.status === "success") {
+            currentUser = {
+                nama: response.user.nama,
+                nim: response.user.nim,
+                hp: response.user.hp,
+                email: response.user.email,
+                role: "pengguna"
+            };
+            masukDashboard();
+        } else {
+            alert(response.message || "Login Gagal! Periksa kembali Username/Password.");
         }
+    }
 
+    /* --- PROSES REGISTRASI --- */
+    function prosesRegistrasi() {
+        const nama = document.getElementById("reg-nama").value;
+        const prodi = document.getElementById("reg-prodi").value;
+        const nim = document.getElementById("reg-nim").value;
+        const hp = document.getElementById("reg-wa").value;
+        const email = document.getElementById("reg-email").value;
+        const username = document.getElementById("reg-username").value;
+        const pass = document.getElementById("reg-password").value;
+
+        const url = `${SCRIPT_URL}?action=registerUser&nama=${encodeURIComponent(nama)}&prodi=${encodeURIComponent(prodi)}&nim=${encodeURIComponent(nim)}&hp=${encodeURIComponent(hp)}&email=${encodeURIComponent(email)}&username=${encodeURIComponent(username)}&password=${encodeURIComponent(pass)}`;
+        executeJSONP(url, 'cb_register');
+    }
+
+    function cb_register(response) {
+        alert(response.message);
+        if (response.status === "success") {
+            switchAuthTab('login');
+        }
+    }
+
+    function masukDashboard() {
         document.getElementById("section-auth").classList.add("hidden");
         document.getElementById("section-dashboard").classList.remove("hidden");
-        document.getElementById("user-display").innerText = currentUser.nama || currentUser.username;
+        document.getElementById("user-display").innerText = currentUser.nama;
         document.getElementById("role-display").innerText = currentUser.role.toUpperCase();
 
         if (currentUser.role === "admin") {
-            document.getElementById("section-form-pinjam").classList.add("hidden");
-            document.getElementById("section-admin-tambah-ruang").classList.remove("hidden");
-            document.getElementById("th-aksi-ruang").classList.remove("hidden");
+            document.getElementById("section-admin-vip").classList.remove("hidden");
             document.getElementById("th-aksi-pinjaman").classList.remove("hidden");
         } else {
-            document.getElementById("section-form-pinjam").classList.remove("hidden");
-            document.getElementById("section-admin-tambah-ruang").classList.add("hidden");
-            document.getElementById("th-aksi-ruang").classList.add("hidden");
+            document.getElementById("section-admin-vip").classList.add("hidden");
             document.getElementById("th-aksi-pinjaman").classList.add("hidden");
         }
 
-        renderTabelRuangan();
-        renderTabelPinjaman();
+        loadDataRuangan();
+        loadDataPinjaman();
     }
 
     function logout() {
         currentUser = null;
         document.getElementById("section-auth").classList.remove("hidden");
         document.getElementById("section-dashboard").classList.add("hidden");
-        document.getElementById("form-login").reset();
     }
 
-    /* --- FUNGSI TAMPILKAN TABEL RUANG & DROPDOWN --- */
-    function renderTabelRuangan() {
+    /* --- MEMUAT DATA RUANGAN --- */
+    function loadDataRuangan() {
+        document.getElementById("loading-ruangan").classList.remove("hidden");
+        executeJSONP(`${SCRIPT_URL}?action=getRooms`, 'cb_getRooms');
+    }
+
+    function cb_getRooms(response) {
+        document.getElementById("loading-ruangan").classList.add("hidden");
+        if (response.status === "success") {
+            dataRuanganGlobal = response.data;
+            renderTabelRuangan(response.data);
+            populateDropdownRuang(response.data);
+        }
+    }
+
+    function renderTabelRuangan(rooms) {
         const tbody = document.getElementById("tabel-ruangan");
         tbody.innerHTML = "";
-        dataRuangan.forEach((r, idx) => {
-            let aksiAdminHtml = "";
-            if (currentUser && currentUser.role === "admin") {
-                aksiAdminHtml = `
-                    <td>
-                        <button onclick="bukaModalEditRuang(${idx})" class="btn-warning btn-sm">Edit</button>
-                        <button onclick="hapusRuangan(${idx})" class="btn-danger btn-sm">Hapus</button>
-                    </td>
-                `;
-            }
-
+        rooms.forEach(r => {
             tbody.innerHTML += `
                 <tr>
-                    <td><strong>${r.kode}</strong></td>
-                    <td>${r.lantai}</td>
-                    <td>${r.kursi}</td>
-                    <td>${r.tv}</td>
+                    <td>Lantai ${r.lantai}</td>
+                    <td><strong>${r.code}</strong></td>
+                    <td>${r.kursi} Kursi</td>
+                    <td>${r.tvSmart}</td>
                     <td>${r.ac}</td>
-                    <td>${r.sk}</td>
-                    <td>${r.pt}</td>
-                    <td>${r.peruntukan}</td>
-                    <td>${r.jam}</td>
-                    ${currentUser && currentUser.role === "admin" ? aksiAdminHtml : ""}
+                    <td>${r.stopKontak}</td>
+                    <td>${r.papanTulis}</td>
+                    <td>${r.waktuLayanan}</td>
+                    <td>${r.program}</td>
                 </tr>
             `;
         });
     }
 
-    function populateSelectRuangan() {
-        const select = document.getElementById("pinjam-ruang");
-        const selectEdit = document.getElementById("edit-pinjam-ruang");
-        
-        let htmlOptions = "";
-        dataRuangan.forEach(r => {
-            htmlOptions += `<option value="${r.kode}">${r.kode} (Lantai ${r.lantai} - Max ${r.kursi} Kursi)</option>`;
+    function populateDropdownRuang(rooms) {
+        const selectPinjam = document.getElementById("pinjam-ruang");
+        const selectVip = document.getElementById("vip-ruang");
+        let html = '<option value="">-- Pilih Ruangan --</option>';
+        rooms.forEach(r => {
+            html += `<option value="${r.code}">${r.code} (Lantai ${r.lantai} - Capacity: ${r.kursi})</option>`;
         });
-
-        if (select) select.innerHTML = htmlOptions;
-        if (selectEdit) selectEdit.innerHTML = htmlOptions;
+        if (selectPinjam) selectPinjam.innerHTML = html;
+        if (selectVip) selectVip.innerHTML = html;
     }
 
-    /* --- FUNGSI KELOLA RUANGAN (ADMIN) --- */
-    function tambahRuanganBaru() {
-        const k = document.getElementById("add-kode").value;
-        const l = parseInt(document.getElementById("add-lantai").value);
-        const kr = parseInt(document.getElementById("add-kursi").value);
-        const tv = parseInt(document.getElementById("add-tv").value);
-        const ac = parseInt(document.getElementById("add-ac").value);
-        const sk = parseInt(document.getElementById("add-sk").value);
-        const pt = parseInt(document.getElementById("add-pt").value);
-        const p = document.getElementById("add-peruntukan").value;
-
-        dataRuangan.push({ kode: k, lantai: l, kursi: kr, tv: tv, ac: ac, sk: sk, pt: pt, peruntukan: p, jam: "07:00 - 17:10" });
-        simpanDataStorage();
-        alert("Ruangan berhasil ditambahkan!");
-        renderTabelRuangan();
-        populateSelectRuangan();
+    /* --- MEMUAT DATA PEMINJAMAN --- */
+    function loadDataPinjaman() {
+        document.getElementById("loading-pinjaman").classList.remove("hidden");
+        executeJSONP(`${SCRIPT_URL}?action=getBookings`, 'cb_getBookings');
     }
 
-    function bukaModalEditRuang(index) {
-        const r = dataRuangan[index];
-        document.getElementById("edit-ruang-index").value = index;
-        document.getElementById("edit-kode").value = r.kode;
-        document.getElementById("edit-lantai").value = r.lantai;
-        document.getElementById("edit-kursi").value = r.kursi;
-        document.getElementById("edit-tv").value = r.tv;
-        document.getElementById("edit-ac").value = r.ac;
-        document.getElementById("edit-sk").value = r.sk;
-        document.getElementById("edit-pt").value = r.pt;
-        document.getElementById("edit-peruntukan").value = r.peruntukan;
-        
-        document.getElementById("modal-edit-ruang").style.display = "block";
-    }
-
-    function simpanEditRuangan() {
-        const idx = document.getElementById("edit-ruang-index").value;
-        dataRuangan[idx] = {
-            kode: document.getElementById("edit-kode").value,
-            lantai: parseInt(document.getElementById("edit-lantai").value),
-            kursi: parseInt(document.getElementById("edit-kursi").value),
-            tv: parseInt(document.getElementById("edit-tv").value),
-            ac: parseInt(document.getElementById("edit-ac").value),
-            sk: parseInt(document.getElementById("edit-sk").value),
-            pt: parseInt(document.getElementById("edit-pt").value),
-            peruntukan: document.getElementById("edit-peruntukan").value,
-            jam: "07:00 - 17:10"
-        };
-        simpanDataStorage();
-        alert("Data ruangan berhasil diperbarui!");
-        tutupModal('modal-edit-ruang');
-        renderTabelRuangan();
-        populateSelectRuangan();
-    }
-
-    function hapusRuangan(index) {
-        if (confirm(`Yakin ingin menghapus ruangan ${dataRuangan[index].kode}?`)) {
-            dataRuangan.splice(index, 1);
-            simpanDataStorage();
-            renderTabelRuangan();
-            populateSelectRuangan();
+    function cb_getBookings(response) {
+        document.getElementById("loading-pinjaman").classList.add("hidden");
+        if (response.status === "success") {
+            dataPinjamanGlobal = response.data;
+            renderTabelPinjaman(response.data);
         }
     }
 
-    /* --- FUNGSI PEMINJAMAN RUANGAN & ANTI-BENTROK --- */
-    function ajukanPinjaman() {
-        const ruang = document.getElementById("pinjam-ruang").value;
-        const tgl = document.getElementById("pinjam-tanggal").value;
-        const sesi = document.getElementById("pinjam-sesi").value;
-        const keperluan = document.getElementById("pinjam-keperluan").value;
-
-        // CEK SISTEM ANTI BENTROK JADWAL
-        const bentrok = listPinjaman.find(p => p.ruang === ruang && p.tanggal === tgl && p.sesi === sesi && p.status !== "Ditolak");
-        if (bentrok) {
-            alert(`JADWAL BENTROK!\nRuang ${ruang} pada tanggal ${tgl} sesi ${sesi} sudah diajukan/disetujui oleh ${bentrok.pemohon}. Silakan pilih jam atau ruangan lain.`);
-            return;
-        }
-
-        listPinjaman.push({
-            id: Date.now(),
-            pemohon: currentUser.nama + " (" + currentUser.username + ")",
-            ruang: ruang,
-            tanggal: tgl,
-            sesi: sesi,
-            keperluan: keperluan,
-            status: "Diproses"
-        });
-
-        simpanDataStorage();
-        alert("Pengajuan peminjaman berhasil dikirim!");
-        document.getElementById("form-pinjam").reset();
-        renderTabelPinjaman();
-    }
-
-    function renderTabelPinjaman() {
+    function renderTabelPinjaman(bookings) {
         const tbody = document.getElementById("tabel-pinjaman");
         tbody.innerHTML = "";
-
-        if (listPinjaman.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="${currentUser && currentUser.role === 'admin' ? 7 : 6}">Belum ada data peminjaman.</td></tr>`;
+        if (bookings.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="8">Belum ada pengajuan peminjaman.</td></tr>`;
             return;
         }
 
-        listPinjaman.forEach((p) => {
-            let badgeClass = "status-diproses";
-            if (p.status === "Disetujui") badgeClass = "status-disetujui";
-            if (p.status === "Ditolak") badgeClass = "status-ditolak";
+        bookings.forEach(b => {
+            let statusBadge = `<span class="status-diproses">${b.status}</span>`;
+            if (b.status === "Disetujui") statusBadge = `<span class="status-disetujui">Disetujui</span>`;
+            if (b.status === "Ditolak") statusBadge = `<span class="status-ditolak">Ditolak</span>`;
 
             let aksiAdminHtml = "";
             if (currentUser && currentUser.role === "admin") {
                 aksiAdminHtml = `
                     <td>
-                        <button onclick="ubahStatus(${p.id}, 'Disetujui')" class="btn-success btn-sm">Setujui</button>
-                        <button onclick="ubahStatus(${p.id}, 'Ditolak')" class="btn-danger btn-sm">Tolak</button>
-                        <button onclick="bukaModalEditPinjaman(${p.id})" class="btn-warning btn-sm">Edit</button>
-                        <button onclick="hapusPinjaman(${p.id})" class="btn-danger btn-sm">Hapus</button>
+                        <button onclick="updateStatus(${b.rowIndex}, 'Disetujui')" class="btn-success btn-sm">ACC</button>
+                        <button onclick="updateStatus(${b.rowIndex}, 'Ditolak')" class="btn-danger btn-sm">Tolak</button>
+                        <button onclick="relokasiRuang(${b.rowIndex})" class="btn-warning btn-sm">Pindah</button>
                     </td>
                 `;
             }
 
             tbody.innerHTML += `
                 <tr>
-                    <td>${p.pemohon}</td>
-                    <td><strong>${p.ruang}</strong></td>
-                    <td>${p.tanggal}</td>
-                    <td>${p.sesi}</td>
-                    <td>${p.keperluan}</td>
-                    <td><span class="${badgeClass}">${p.status}</span></td>
+                    <td>${b.waktuInput}</td>
+                    <td><strong>${b.roomCode}</strong></td>
+                    <td>${b.pemohon}</td>
+                    <td>${b.nim}</td>
+                    <td>${b.keperluan}</td>
+                    <td>${b.tanggal}<br><small>(${b.jam})</small></td>
+                    <td>${statusBadge}</td>
                     ${currentUser && currentUser.role === "admin" ? aksiAdminHtml : ""}
                 </tr>
             `;
         });
     }
 
-    function ubahStatus(id, statusBaru) {
-        const index = listPinjaman.findIndex(p => p.id === id);
-        if (index !== -1) {
-            listPinjaman[index].status = statusBaru;
-            simpanDataStorage();
-            renderTabelPinjaman();
+    /* --- AKSI PEMINJAMAN REGULER --- */
+    function ajukanPinjaman() {
+        const roomCode = document.getElementById("pinjam-ruang").value;
+        const tanggal = document.getElementById("pinjam-tanggal").value;
+        const jamMulai = document.getElementById("pinjam-jam-mulai").value;
+        const jamSelesai = document.getElementById("pinjam-jam-selesai").value;
+        const keperluan = document.getElementById("pinjam-keperluan").value;
+
+        const url = `${SCRIPT_URL}?action=addBooking&roomCode=${encodeURIComponent(roomCode)}&nama=${encodeURIComponent(currentUser.nama)}&nim=${encodeURIComponent(currentUser.nim || '-')}&hp=${encodeURIComponent(currentUser.hp || '-')}&keperluan=${encodeURIComponent(keperluan)}&tanggal=${encodeURIComponent(tanggal)}&jamMulai=${encodeURIComponent(jamMulai)}&jamSelesai=${encodeURIComponent(jamSelesai)}`;
+        executeJSONP(url, 'cb_addBooking');
+    }
+
+    function cb_addBooking(response) {
+        alert(response.message);
+        if (response.status === "success") {
+            loadDataPinjaman();
         }
     }
 
-    function bukaModalEditPinjaman(id) {
-        const p = listPinjaman.find(item => item.id === id);
-        if (p) {
-            document.getElementById("edit-pinjam-id").value = p.id;
-            document.getElementById("edit-pemohon").value = p.pemohon;
-            document.getElementById("edit-pinjam-ruang").value = p.ruang;
-            document.getElementById("edit-pinjam-tanggal").value = p.tanggal;
-            document.getElementById("edit-pinjam-sesi").value = p.sesi;
-            document.getElementById("edit-pinjam-keperluan").value = p.keperluan;
-            document.getElementById("modal-edit-pinjaman").style.display = "block";
+    /* --- AKSI BOOKING KILAT PIMPINAN (VIP) --- */
+    function ajukanBookingVip() {
+        const roomCode = document.getElementById("vip-ruang").value;
+        const pemohon = document.getElementById("vip-pemohon").value;
+        const tanggal = document.getElementById("vip-tanggal").value;
+        const jamMulai = document.getElementById("vip-jam-mulai").value;
+        const jamSelesai = document.getElementById("vip-jam-selesai").value;
+        const keperluan = document.getElementById("vip-keperluan").value;
+
+        const url = `${SCRIPT_URL}?action=addVipBooking&roomCode=${encodeURIComponent(roomCode)}&pemohon=${encodeURIComponent(pemohon)}&keperluan=${encodeURIComponent(keperluan)}&tanggal=${encodeURIComponent(tanggal)}&jamMulai=${encodeURIComponent(jamMulai)}&jamSelesai=${encodeURIComponent(jamSelesai)}`;
+        executeJSONP(url, 'cb_addVipBooking');
+    }
+
+    function cb_addVipBooking(response) {
+        alert(response.message);
+        if (response.status === "success") {
+            loadDataPinjaman();
         }
     }
 
-    function simpanEditPinjaman() {
-        const id = parseInt(document.getElementById("edit-pinjam-id").value);
-        const index = listPinjaman.findIndex(p => p.id === id);
+    /* --- AKSI KELOLA ADMIN & RELOKASI --- */
+    function updateStatus(rowIndex, newStatus) {
+        const url = `${SCRIPT_URL}?action=updateBookingStatus&rowIndex=${rowIndex}&newStatus=${encodeURIComponent(newStatus)}`;
+        executeJSONP(url, 'cb_updateStatus');
+    }
 
-        if (index !== -1) {
-            listPinjaman[index].pemohon = document.getElementById("edit-pemohon").value;
-            listPinjaman[index].ruang = document.getElementById("edit-pinjam-ruang").value;
-            listPinjaman[index].tanggal = document.getElementById("edit-pinjam-tanggal").value;
-            listPinjaman[index].sesi = document.getElementById("edit-pinjam-sesi").value;
-            listPinjaman[index].keperluan = document.getElementById("edit-pinjam-keperluan").value;
+    function cb_updateStatus(response) {
+        alert(response.message);
+        loadDataPinjaman();
+    }
 
-            simpanDataStorage();
-            alert("Peminjaman berhasil diperbarui!");
-            tutupModal('modal-edit-pinjaman');
-            renderTabelPinjaman();
+    function relokasiRuang(rowIndex) {
+        const newRoomCode = prompt("Masukkan Kode Ruangan Baru untuk Pindah Relokasi (Contoh: F3.02.06):");
+        if (newRoomCode) {
+            const url = `${SCRIPT_URL}?action=relocateBooking&rowIndex=${rowIndex}&newRoomCode=${encodeURIComponent(newRoomCode)}`;
+            executeJSONP(url, 'cb_relocate');
         }
     }
 
-    function hapusPinjaman(id) {
-        if (confirm("Apakah Anda yakin ingin menghapus transaksi peminjaman ini?")) {
-            listPinjaman = listPinjaman.filter(p => p.id !== id);
-            simpanDataStorage();
-            renderTabelPinjaman();
-        }
-    }
-
-    function tutupModal(modalId) {
-        document.getElementById(modalId).style.display = "none";
+    function cb_relocate(response) {
+        alert(response.message);
+        loadDataPinjaman();
     }
 </script>
 
