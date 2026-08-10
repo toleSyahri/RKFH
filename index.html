@@ -450,9 +450,15 @@
 
             let aksiAdminHtml = "";
             if (currentUser && currentUser.role === "admin") {
+                // KODE BARU (Serba Otomatis & Aman):
                 let rawHp = (b.hp && b.hp !== "-") ? b.hp.toString() : "";
-                let cleanHp = rawHp.replace(/[^0-9]/g, '');
-                if (cleanHp.startsWith("0")) cleanHp = "62" + cleanHp.substring(1);
+                let cleanHp = rawHp.replace(/[^0-9]/g, ''); // Hapus semua karakter selain angka
+                
+                if (cleanHp.startsWith("0")) {
+                    cleanHp = "62" + cleanHp.substring(1); // Contoh: 0889... -> 62889...
+                } else if (cleanHp.startsWith("8")) {
+                    cleanHp = "62" + cleanHp;             // Contoh: 889... -> 62889... (Solusi Masalah Ini!)
+                }
 
                 let msgWa = encodeURIComponent(`Yth. Bapak/Ibu/Saudara *${b.pemohon}*,\n\nMengenai pengajuan peminjaman ruang *${b.roomCode}* untuk tanggal *${b.tanggal} (${b.jam})* dengan status: *${b.status.toUpperCase()}*.\n\nDemikian informasi ini disampaikan. Terima kasih!\n- Admin SIM-RUANG FH UNESA`);
                 let urlWaDirect = cleanHp ? `https://api.whatsapp.com/send?phone=${cleanHp}&text=${msgWa}` : `https://wa.me/`;
