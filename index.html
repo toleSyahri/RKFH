@@ -117,7 +117,10 @@
     <div id="section-dashboard" class="hidden">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
             <div>Selamat datang, <strong id="user-display"></strong> (<span id="role-display"></span>)</div>
-            <button onclick="logout()" class="btn-danger btn-sm" style="padding: 8px 15px;">Logout</button>
+            <div>
+                <button onclick="resetToDefaultData()" class="btn-warning btn-sm" style="padding: 8px 12px; margin-right: 5px;">Reset Data Default</button>
+                <button onclick="logout()" class="btn-danger btn-sm" style="padding: 8px 15px;">Logout</button>
+            </div>
         </div>
 
         <!-- FORM PINJAM (Khusus User Biasa) -->
@@ -348,10 +351,27 @@
         { kode: "F1.02.01", lantai: 2, kursi: 84, tv: 1, ac: 2, sk: 5, pt: 1, peruntukan: "S1", jam: "07:00 - 17:10" }
     ];
 
-    // INISIALISASI PENGGUNAAN LOCALSTORAGE (STORAGE PERMANEN BROWSER)
+    // DATA DEFAULT HISTORI PENGAJUAN (SESUAI FOTO KAMU)
+    const initialPinjaman = [
+        {
+            id: 1,
+            pemohon: "Pengguna Umum (user)",
+            ruang: "F4.01.06",
+            tanggal: "2026-08-11",
+            sesi: "10:20 - 12:00",
+            keperluan: "kuliah",
+            status: "Diproses"
+        }
+    ];
+
+    // INISIALISASI STORAGE BROWSER
     let dataRuangan = JSON.parse(localStorage.getItem('unesa_ruangan')) || initialRuangan;
     let listUsers = JSON.parse(localStorage.getItem('unesa_users')) || [];
-    let listPinjaman = JSON.parse(localStorage.getItem('unesa_pinjaman')) || [];
+    
+    // BACA / SET HISTORI PENGAJUAN (Bila kosong/null, otomatis terisi data bawaan)
+    let storedPinjaman = JSON.parse(localStorage.getItem('unesa_pinjaman'));
+    let listPinjaman = (storedPinjaman && storedPinjaman.length > 0) ? storedPinjaman : initialPinjaman;
+
     let currentUser = null;
 
     window.onload = function() {
@@ -364,6 +384,18 @@
         localStorage.setItem('unesa_ruangan', JSON.stringify(dataRuangan));
         localStorage.setItem('unesa_users', JSON.stringify(listUsers));
         localStorage.setItem('unesa_pinjaman', JSON.stringify(listPinjaman));
+    }
+
+    // FUNGSI RESET JIKA INGIN MENGEMBALIKAN DATA DENGAN AMAN
+    function resetToDefaultData() {
+        if(confirm("Apakah Anda yakin ingin mengembalikan histori peminjaman ke data awal demo?")) {
+            listPinjaman = [...initialPinjaman];
+            dataRuangan = [...initialRuangan];
+            simpanDataStorage();
+            renderTabelRuangan();
+            renderTabelPinjaman();
+            alert("Data berhasil dipulihkan!");
+        }
     }
 
     /* --- AUTHENTICATION & TAB --- */
