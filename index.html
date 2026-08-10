@@ -477,9 +477,13 @@
         const jamSelesai = document.getElementById("pinjam-jam-selesai").value;
         const keperluan = document.getElementById("pinjam-keperluan").value;
 
-        const url = `${SCRIPT_URL}?action=addBooking&roomCode=${encodeURIComponent(roomCode)}&nama=${encodeURIComponent(currentUser.nama)}&nim=${encodeURIComponent(currentUser.nim || '-')}&hp=${encodeURIComponent(currentUser.hp || '-')}&keperluan=${encodeURIComponent(keperluan)}&tanggal=${encodeURIComponent(tanggal)}&jamMulai=${encodeURIComponent(jamMulai)}&jamSelesai=${encodeURIComponent(jamSelesai)}`;
-        executeJSONP(url, 'cb_addBooking');
-    }
+        / AMBIL HP USER DENGAN PASTI
+    const noHpUser = (currentUser && currentUser.hp) ? currentUser.hp : "";
+
+    const url = `${SCRIPT_URL}?action=addBooking&roomCode=${encodeURIComponent(roomCode)}&nama=${encodeURIComponent(currentUser.nama)}&nim=${encodeURIComponent(currentUser.nim || '-')}&hp=${encodeURIComponent(noHpUser)}&keperluan=${encodeURIComponent(keperluan)}&tanggal=${encodeURIComponent(tanggal)}&jamMulai=${encodeURIComponent(jamMulai)}&jamSelesai=${encodeURIComponent(jamSelesai)}`;
+    
+    executeJSONP(url, 'cb_addBooking');
+}
 
     function cb_addBooking(response) {
     alert(response.message);
@@ -565,15 +569,20 @@ function eksekusiRelokasi() {
 }
 
     function cb_relocate(response) {
-    alert(response.message);
     if (response.status === "success") {
         if (response.waUrl) {
-            window.open(response.waUrl, '_blank');
+            // Tampilkan pilihan langsung ke Admin agar aman dari blokir browser
+            if (confirm(response.message + "\n\nKlik 'OK' untuk membuka WhatsApp dan mengirim pesan konfirmasi ke Pemohon.")) {
+                window.open(response.waUrl, '_blank');
+            }
+        } else {
+            alert(response.message + "\n(Catatan: Nomor HP pemohon tidak ditemukan/kosong)");
         }
         loadDataPinjaman();
+    } else {
+        alert(response.message);
     }
-}
-</script>
+}cript>
 
 <!-- MODAL RELOKASI (DROPDOWN + ALASAN PEMBERITAHUAN WA) -->
 <div id="modal-relokasi" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:9999; justify-content:center; align-items:center;">
