@@ -239,19 +239,40 @@
     </div>
 </div>
 
+<!-- MODAL RELOKASI (DROPDOWN + ALASAN PEMBERITAHUAN WA) -->
+<div id="modal-relokasi" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:9999; justify-content:center; align-items:center;">
+    <div style="background:white; padding:25px; border-radius:10px; width:90%; max-width:450px; box-shadow:0 5px 15px rgba(0,0,0,0.3);">
+        <h3 style="margin-top:0; color:#003366;">Pindahkan / Relokasi Ruangan</h3>
+        <p style="font-size:12.5px; color:#555;">Pilih ruangan baru dan berikan permohonan maaf/alasan pemindahan untuk dikirimkan via WA ke pemohon.</p>
+        
+        <div class="form-group" style="margin-bottom:12px;">
+            <label style="display:block; margin-bottom:5px; font-weight:bold; font-size:13px;">Pilih Ruangan Baru:</label>
+            <select id="select-relokasi-ruang" style="width:100%; padding:10px; border-radius:5px; border:1px solid #ccc;"></select>
+        </div>
+
+        <div class="form-group" style="margin-bottom:15px;">
+            <label style="display:block; margin-bottom:5px; font-weight:bold; font-size:13px;">Alasan / Catatan Pemindahan:</label>
+            <textarea id="alasan-relokasi" rows="3" style="width:100%; padding:8px; border-radius:5px; border:1px solid #ccc; font-family:inherit; font-size:13px;" placeholder="Contoh: Mohon maaf, ruangan semula akan dipergunakan untuk Kegiatan Dekanat/Rapat Senat..."></textarea>
+        </div>
+
+        <input type="hidden" id="relokasi-row-index">
+
+        <div style="display:flex; gap:10px; justify-content:flex-end;">
+            <button onclick="tutupModalRelokasi()" style="background:#6c757d; color:white; border:none; padding:8px 15px; border-radius:5px; cursor:pointer;">Batal</button>
+            <button onclick="eksekusiRelokasi()" class="btn-warning" style="border:none; padding:8px 15px; border-radius:5px; cursor:pointer; font-weight:bold;">Simpan & Kirim Konfirmasi WA</button>
+        </div>
+    </div>
+</div>
+
 <script>
-    // =========================================================================
-    // PASTE URL WEB APP GOOGLE APPS SCRIPT (.GS) KAMU DI BAWAH INI
-    // =========================================================================
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwaJDJuSi6F6Z-lQycc3c3iW570d3b_zGqmgDRm-tbdeUuLXpTBGpqcgIKSmiUiOjtY/exec"; 
 
     let currentUser = null;
     let dataRuanganGlobal = [];
     let dataPinjamanGlobal = [];
 
-    // Helper Fungsi Eksekusi Request JSONP (Anti CORS)
+    // Helper Fungsi Eksekusi Request JSONP
     function executeJSONP(url, callbackName) {
-        // Hapus script lama jika ada
         const oldScript = document.getElementById('jsonp-' + callbackName);
         if (oldScript) oldScript.remove();
 
@@ -284,14 +305,12 @@
         const user = document.getElementById("login-username").value.trim();
         const pass = document.getElementById("login-password").value.trim();
 
-        // Bypass khusus Admin Master
         if (user === "syahrisyahri@unesa.ac.id" && pass === "admin123") {
-            currentUser = { nama: "Syahri (Admin Master)", role: "admin", nim: "NIP.19830807" };
+            currentUser = { nama: "Syahri (Admin Master)", role: "admin", nim: "NIP.19830807", hp: "081331382680" };
             masukDashboard();
             return;
         }
 
-        // Login Reguler via Google Sheets
         const url = `${SCRIPT_URL}?action=loginUser&username=${encodeURIComponent(user)}&password=${encodeURIComponent(pass)}`;
         executeJSONP(url, 'cb_login');
     }
@@ -430,29 +449,25 @@
             if (b.status === "Ditolak") statusBadge = `<span class="status-ditolak">Ditolak</span>`;
 
             let aksiAdminHtml = "";
-        if (currentUser && currentUser.role === "admin") {
-            // Tentukan nomor HP (jika kosong/tidak ada, pakai string kosong)
-            let rawHp = (b.hp && b.hp !== "-") ? b.hp.toString() : "";
-            let cleanHp = rawHp.replace(/[^0-9]/g, '');
-            if (cleanHp.startsWith("0")) cleanHp = "62" + cleanHp.substring(1);
+            if (currentUser && currentUser.role === "admin") {
+                let rawHp = (b.hp && b.hp !== "-") ? b.hp.toString() : "";
+                let cleanHp = rawHp.replace(/[^0-9]/g, '');
+                if (cleanHp.startsWith("0")) cleanHp = "62" + cleanHp.substring(1);
 
-            // Draft Pesan WA
-            let msgWa = encodeURIComponent(`Yth. Bapak/Ibu/Saudara *${b.pemohon}*,\n\nMengenai pengajuan peminjaman ruang *${b.roomCode}* untuk tanggal *${b.tanggal} (${b.jam})* dengan status: *${b.status.toUpperCase()}*.\n\nDemikian informasi ini disampaikan. Terima kasih!\n- Admin SIM-RUANG FH UNESA`);
-            
-            // Link WA (jika hp ada -> langsung ke WA pemohon; jika tidak -> buka wa.me umum)
-            let urlWaDirect = cleanHp ? `https://api.whatsapp.com/send?phone=${cleanHp}&text=${msgWa}` : `https://wa.me/`;
+                let msgWa = encodeURIComponent(`Yth. Bapak/Ibu/Saudara *${b.pemohon}*,\n\nMengenai pengajuan peminjaman ruang *${b.roomCode}* untuk tanggal *${b.tanggal} (${b.jam})* dengan status: *${b.status.toUpperCase()}*.\n\nDemikian informasi ini disampaikan. Terima kasih!\n- Admin SIM-RUANG FH UNESA`);
+                let urlWaDirect = cleanHp ? `https://api.whatsapp.com/send?phone=${cleanHp}&text=${msgWa}` : `https://wa.me/`;
 
-            let btnWaHtml = `<a href="${urlWaDirect}" target="_blank" style="text-decoration:none; display:inline-block; margin-top:4px; padding:3px 8px; background-color:#25D366; color:white; border-radius:4px; font-size:11px; font-weight:bold;">💬 Chat WA</a>`;
+                let btnWaHtml = `<a href="${urlWaDirect}" target="_blank" style="text-decoration:none; display:inline-block; margin-top:4px; padding:3px 8px; background-color:#25D366; color:white; border-radius:4px; font-size:11px; font-weight:bold;">💬 Chat WA</a>`;
 
-            aksiAdminHtml = `
-                <td>
-                    <button onclick="updateStatus(${b.rowIndex}, 'Disetujui')" class="btn-success btn-sm">ACC</button>
-                    <button onclick="updateStatus(${b.rowIndex}, 'Ditolak')" class="btn-danger btn-sm">Tolak</button>
-                    <button onclick="relokasiRuang(${b.rowIndex})" class="btn-warning btn-sm">Pindah</button><br>
-                    ${btnWaHtml}
-                </td>
-            `;
-        }
+                aksiAdminHtml = `
+                    <td>
+                        <button onclick="updateStatus(${b.rowIndex}, 'Disetujui')" class="btn-success btn-sm">ACC</button>
+                        <button onclick="updateStatus(${b.rowIndex}, 'Ditolak')" class="btn-danger btn-sm">Tolak</button>
+                        <button onclick="relokasiRuang(${b.rowIndex})" class="btn-warning btn-sm">Pindah</button><br>
+                        ${btnWaHtml}
+                    </td>
+                `;
+            }
 
             tbody.innerHTML += `
                 <tr>
@@ -477,23 +492,23 @@
         const jamSelesai = document.getElementById("pinjam-jam-selesai").value;
         const keperluan = document.getElementById("pinjam-keperluan").value;
 
-        / AMBIL HP USER DENGAN PASTI
-    const noHpUser = (currentUser && currentUser.hp) ? currentUser.hp : "";
+        // Ambil No HP user dengan aman
+        const noHpUser = (currentUser && currentUser.hp) ? currentUser.hp : "";
 
-    const url = `${SCRIPT_URL}?action=addBooking&roomCode=${encodeURIComponent(roomCode)}&nama=${encodeURIComponent(currentUser.nama)}&nim=${encodeURIComponent(currentUser.nim || '-')}&hp=${encodeURIComponent(noHpUser)}&keperluan=${encodeURIComponent(keperluan)}&tanggal=${encodeURIComponent(tanggal)}&jamMulai=${encodeURIComponent(jamMulai)}&jamSelesai=${encodeURIComponent(jamSelesai)}`;
-    
-    executeJSONP(url, 'cb_addBooking');
-}
+        const url = `${SCRIPT_URL}?action=addBooking&roomCode=${encodeURIComponent(roomCode)}&nama=${encodeURIComponent(currentUser.nama)}&nim=${encodeURIComponent(currentUser.nim || '-')}&hp=${encodeURIComponent(noHpUser)}&keperluan=${encodeURIComponent(keperluan)}&tanggal=${encodeURIComponent(tanggal)}&jamMulai=${encodeURIComponent(jamMulai)}&jamSelesai=${encodeURIComponent(jamSelesai)}`;
+        
+        executeJSONP(url, 'cb_addBooking');
+    }
 
     function cb_addBooking(response) {
-    alert(response.message);
-    if (response.status === "success") {
-        if (response.waUrl) {
-            window.open(response.waUrl, '_blank');
+        alert(response.message);
+        if (response.status === "success") {
+            if (response.waUrl) {
+                window.open(response.waUrl, '_blank');
+            }
+            loadDataPinjaman();
         }
-        loadDataPinjaman();
     }
-}
 
     /* --- AKSI BOOKING KILAT PIMPINAN (VIP) --- */
     function ajukanBookingVip() {
@@ -522,92 +537,62 @@
     }
 
     function cb_updateStatus(response) {
-    alert(response.message);
-    if (response.status === "success") {
-        if (response.waUrl) {
-            window.open(response.waUrl, '_blank');
-        }
-        loadDataPinjaman();
-    }
-}
-
-    // Buka Modal dengan Dropdown Ruangan
-function relokasiRuang(rowIndex) {
-    document.getElementById("relokasi-row-index").value = rowIndex;
-    
-    // Isi Dropdown Modal dari Data Ruangan Global
-    const select = document.getElementById("select-relokasi-ruang");
-    select.innerHTML = '<option value="">-- Pilih Ruangan Baru --</option>';
-    
-    dataRuanganGlobal.forEach(r => {
-        select.innerHTML += `<option value="${r.code}">${r.code} (Lantai ${r.lantai} - Kapasitas: ${r.kursi})</option>`;
-    });
-
-    // Tampilkan Modal Pop-up
-    document.getElementById("modal-relokasi").style.display = "flex";
-}
-
-// Tutup Modal
-function tutupModalRelokasi() {
-    document.getElementById("modal-relokasi").style.display = "none";
-}
-
-// Kirim Perubahan ke Google Sheets
-function eksekusiRelokasi() {
-    const rowIndex = document.getElementById("relokasi-row-index").value;
-    const newRoomCode = document.getElementById("select-relokasi-ruang").value;
-    const alasan = document.getElementById("alasan-relokasi").value.trim();
-
-    if (!newRoomCode) {
-        alert("Silakan pilih ruangan baru terlebih dahulu!");
-        return;
-    }
-
-    tutupModalRelokasi();
-    const url = `${SCRIPT_URL}?action=relocateBooking&rowIndex=${rowIndex}&newRoomCode=${encodeURIComponent(newRoomCode)}&alasan=${encodeURIComponent(alasan)}`;
-    executeJSONP(url, 'cb_relocate');
-}
-
-    function cb_relocate(response) {
-    if (response.status === "success") {
-        if (response.waUrl) {
-            // Tampilkan pilihan langsung ke Admin agar aman dari blokir browser
-            if (confirm(response.message + "\n\nKlik 'OK' untuk membuka WhatsApp dan mengirim pesan konfirmasi ke Pemohon.")) {
+        alert(response.message);
+        if (response.status === "success") {
+            if (response.waUrl) {
                 window.open(response.waUrl, '_blank');
             }
-        } else {
-            alert(response.message + "\n(Catatan: Nomor HP pemohon tidak ditemukan/kosong)");
+            loadDataPinjaman();
         }
-        loadDataPinjaman();
-    } else {
-        alert(response.message);
     }
-}cript>
 
-<!-- MODAL RELOKASI (DROPDOWN + ALASAN PEMBERITAHUAN WA) -->
-<div id="modal-relokasi" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:9999; justify-content:center; align-items:center;">
-    <div style="background:white; padding:25px; border-radius:10px; width:90%; max-width:450px; box-shadow:0 5px 15px rgba(0,0,0,0.3);">
-        <h3 style="margin-top:0; color:#003366;">Pindahkan / Relokasi Ruangan</h3>
-        <p style="font-size:12.5px; color:#555;">Pilih ruangan baru dan berikan permohonan maaf/alasan pemindahan untuk dikirimkan via WA ke pemohon.</p>
+    function relokasiRuang(rowIndex) {
+        document.getElementById("relokasi-row-index").value = rowIndex;
         
-        <div class="form-group" style="margin-bottom:12px;">
-            <label style="display:block; margin-bottom:5px; font-weight:bold; font-size:13px;">Pilih Ruangan Baru:</label>
-            <select id="select-relokasi-ruang" style="width:100%; padding:10px; border-radius:5px; border:1px solid #ccc;"></select>
-        </div>
+        const select = document.getElementById("select-relokasi-ruang");
+        select.innerHTML = '<option value="">-- Pilih Ruangan Baru --</option>';
+        
+        dataRuanganGlobal.forEach(r => {
+            select.innerHTML += `<option value="${r.code}">${r.code} (Lantai ${r.lantai} - Kapasitas: ${r.kursi})</option>`;
+        });
 
-        <div class="form-group" style="margin-bottom:15px;">
-            <label style="display:block; margin-bottom:5px; font-weight:bold; font-size:13px;">Alasan / Catatan Pemindahan:</label>
-            <textarea id="alasan-relokasi" rows="3" style="width:100%; padding:8px; border-radius:5px; border:1px solid #ccc; font-family:inherit; font-size:13px;" placeholder="Contoh: Mohon maaf, ruangan semula akan dipergunakan untuk Kegiatan Dekanat/Rapat Senat..."></textarea>
-        </div>
+        document.getElementById("modal-relokasi").style.display = "flex";
+    }
 
-        <input type="hidden" id="relokasi-row-index">
+    function tutupModalRelokasi() {
+        document.getElementById("modal-relokasi").style.display = "none";
+    }
 
-        <div style="display:flex; gap:10px; justify-content:flex-end;">
-            <button onclick="tutupModalRelokasi()" style="background:#6c757d; color:white; border:none; padding:8px 15px; border-radius:5px; cursor:pointer;">Batal</button>
-            <button onclick="eksekusiRelokasi()" class="btn-warning" style="border:none; padding:8px 15px; border-radius:5px; cursor:pointer; font-weight:bold;">Simpan & Kirim Konfirmasi WA</button>
-        </div>
-    </div>
-</div>
-    
+    function eksekusiRelokasi() {
+        const rowIndex = document.getElementById("relokasi-row-index").value;
+        const newRoomCode = document.getElementById("select-relokasi-ruang").value;
+        const alasan = document.getElementById("alasan-relokasi").value.trim();
+
+        if (!newRoomCode) {
+            alert("Silakan pilih ruangan baru terlebih dahulu!");
+            return;
+        }
+
+        tutupModalRelokasi();
+        const url = `${SCRIPT_URL}?action=relocateBooking&rowIndex=${rowIndex}&newRoomCode=${encodeURIComponent(newRoomCode)}&alasan=${encodeURIComponent(alasan)}`;
+        executeJSONP(url, 'cb_relocate');
+    }
+
+    function cb_relocate(response) {
+        if (response.status === "success") {
+            if (response.waUrl) {
+                if (confirm(response.message + "\n\nKlik 'OK' untuk membuka WhatsApp dan mengirim pesan konfirmasi ke Pemohon.")) {
+                    window.open(response.waUrl, '_blank');
+                }
+            } else {
+                alert(response.message + "\n(Catatan: Nomor HP pemohon tidak ditemukan/kosong)");
+            }
+            loadDataPinjaman();
+        } else {
+            alert(response.message);
+        }
+    }
+</script>
+
 </body>
 </html>
