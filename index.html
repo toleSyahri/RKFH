@@ -522,9 +522,14 @@
     }
 
     function cb_relocate(response) {
-        alert(response.message);
+    alert(response.message);
+    if (response.status === "success") {
+        if (response.waUrl) {
+            window.open(response.waUrl, '_blank');
+        }
         loadDataPinjaman();
     }
+}
 </script>
 
 </body>
