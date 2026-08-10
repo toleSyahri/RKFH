@@ -430,15 +430,28 @@
             if (b.status === "Ditolak") statusBadge = `<span class="status-ditolak">Ditolak</span>`;
 
             let aksiAdminHtml = "";
-            if (currentUser && currentUser.role === "admin") {
-                aksiAdminHtml = `
-                    <td>
-                        <button onclick="updateStatus(${b.rowIndex}, 'Disetujui')" class="btn-success btn-sm">ACC</button>
-                        <button onclick="updateStatus(${b.rowIndex}, 'Ditolak')" class="btn-danger btn-sm">Tolak</button>
-                        <button onclick="relokasiRuang(${b.rowIndex})" class="btn-warning btn-sm">Pindah</button>
-                    </td>
-                `;
+        if (currentUser && currentUser.role === "admin") {
+            // 💬 TOMBOL WA MANUAL UNTUK ADMIN
+            let btnWaHtml = "";
+            if (b.hp && b.hp !== "-" && b.hp !== "") {
+                let cleanHp = b.hp.toString().replace(/[^0-9]/g, '');
+                if (cleanHp.startsWith("0")) cleanHp = "62" + cleanHp.substring(1);
+                
+                let msgWa = encodeURIComponent(`Yth. Bapak/Ibu/Saudara *${b.pemohon}*,\n\nMengenai pengajuan peminjaman ruang *${b.roomCode}* untuk tanggal *${b.tanggal} (${b.jam})* dengan status: *${b.status.toUpperCase()}*.\n\nDemikian informasi ini disampaikan. Terima kasih!\n- Admin SIM-RUANG FH UNESA`);
+                let urlWaDirect = `https://api.whatsapp.com/send?phone=${cleanHp}&text=${msgWa}`;
+                
+                btnWaHtml = `<a href="${urlWaDirect}" target="_blank" style="text-decoration:none; display:inline-block; margin-top:3px; padding:3px 8px; background-color:#25D366; color:white; border-radius:4px; font-size:11px; font-weight:bold;">💬 Chat WA</a>`;
             }
+
+            aksiAdminHtml = `
+                <td>
+                    <button onclick="updateStatus(${b.rowIndex}, 'Disetujui')" class="btn-success btn-sm">ACC</button>
+                    <button onclick="updateStatus(${b.rowIndex}, 'Ditolak')" class="btn-danger btn-sm">Tolak</button>
+                    <button onclick="relokasiRuang(${b.rowIndex})" class="btn-warning btn-sm">Pindah</button><br>
+                    ${btnWaHtml}
+                </td>
+            `;
+        }
 
             tbody.innerHTML += `
                 <tr>
