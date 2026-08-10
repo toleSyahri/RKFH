@@ -468,11 +468,14 @@
     }
 
     function cb_addBooking(response) {
-        alert(response.message);
-        if (response.status === "success") {
-            loadDataPinjaman();
+    alert(response.message);
+    if (response.status === "success") {
+        if (response.waUrl) {
+            window.open(response.waUrl, '_blank');
         }
+        loadDataPinjaman();
     }
+}
 
     /* --- AKSI BOOKING KILAT PIMPINAN (VIP) --- */
     function ajukanBookingVip() {
@@ -501,9 +504,14 @@
     }
 
     function cb_updateStatus(response) {
-        alert(response.message);
+    alert(response.message);
+    if (response.status === "success") {
+        if (response.waUrl) {
+            window.open(response.waUrl, '_blank');
+        }
         loadDataPinjaman();
     }
+}
 
     function relokasiRuang(rowIndex) {
         const newRoomCode = prompt("Masukkan Kode Ruangan Baru untuk Pindah Relokasi (Contoh: F3.02.06):");
