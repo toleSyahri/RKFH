@@ -9,6 +9,7 @@
         .container { max-width: 1100px; margin: auto; background: white; padding: 25px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
         h1, h2, h3 { color: #003366; text-align: center; margin-bottom: 20px; }
         
+        /* Card Login, Register & Form */
         .card { background: #eef2f7; padding: 20px; border-radius: 6px; margin-bottom: 20px; border-left: 5px solid #003366; }
         .card-admin { background: #fff8e7; border-left: 5px solid #f0ad4e; }
         .form-group { margin-bottom: 15px; }
@@ -26,20 +27,26 @@
         .btn-danger:hover { background-color: #c9302c; }
         .btn-sm { width: auto; padding: 4px 8px; font-size: 12px; margin: 2px; display: inline-block; }
         
+        /* Tab Navigasi Auth */
+        .auth-tabs { display: flex; gap: 10px; margin-bottom: 15px; }
+        .auth-tabs button { margin-top: 0; background: #ccc; color: #333; }
+        .auth-tabs button.active { background: #003366; color: white; }
+
+        /* Tabel */
         table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 13px; }
         th, td { border: 1px solid #dddddd; text-align: center; padding: 8px; }
         th { background-color: #003366; color: white; }
         tr:nth-child(even) { background-color: #f9f9f9; }
         
+        /* Status Badge */
         .status-diproses { background-color: #f0ad4e; color: white; padding: 3px 8px; border-radius: 4px; font-size: 12px; }
         .status-disetujui { background-color: #5cb85c; color: white; padding: 3px 8px; border-radius: 4px; font-size: 12px; }
         .status-ditolak { background-color: #d9534f; color: white; padding: 3px 8px; border-radius: 4px; font-size: 12px; }
         
+        /* Modal Popup Edit */
         .modal { display: none; position: fixed; z-index: 100; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); }
         .modal-content { background: white; margin: 5% auto; padding: 20px; border-radius: 8px; width: 90%; max-width: 500px; }
 
-        .tab-btn { background: #ddd; color: #333; width: auto; display: inline-block; padding: 8px 15px; margin-bottom: 10px; cursor: pointer; border-radius: 4px 4px 0 0; }
-        .tab-btn.active { background: #003366; color: white; }
         .contact-info { background: #e8f4f8; padding: 10px; border-radius: 4px; margin-top: 15px; font-size: 13px; text-align: center; }
         .hidden { display: none; }
     </style>
@@ -49,17 +56,17 @@
 <div class="container">
     <h1>Sistem Peminjaman Ruang Perkuliahan<br>Fakultas Hukum UNESA</h1>
 
-    <!-- 1. HALAMAN AUTENTIKASI (LOGIN & REGISTRASI) -->
+    <!-- 1. HALAMAN AUTHENTICATION (LOGIN & REGISTRASI) -->
     <div id="section-auth" class="card">
-        <div>
-            <span id="tab-login-btn" class="tab-btn active" onclick="switchAuthTab('login')">Login System</span>
-            <span id="tab-register-btn" class="tab-btn" onclick="switchAuthTab('register')">Daftar Akun Baru</span>
+        <div class="auth-tabs">
+            <button id="btn-tab-login" class="active" onclick="switchAuthTab('login')">Login System</button>
+            <button id="btn-tab-register" onclick="switchAuthTab('register')">Daftar Akun Baru</button>
         </div>
 
         <!-- FORM LOGIN -->
-        <div id="form-login-box">
+        <div id="form-login-container">
             <h2>Login User / Admin</h2>
-            <form onsubmit="event.preventDefault(); prosesLogin();">
+            <form id="form-login" onsubmit="event.preventDefault(); prosesLogin();">
                 <div class="form-group">
                     <label>Username / Email</label>
                     <input type="text" id="login-username" placeholder="Masukkan username/email" required>
@@ -72,22 +79,22 @@
             </form>
             <div style="font-size: 12px; margin-top: 15px; color: #666;">
                 <strong>Catatan Login Demo:</strong><br>
-                • Admin Default: <i>syahrisyahri@unesa.ac.id</i> | Pass: <i>admin123</i>[cite: 1]<br>
+                • Admin Default: <i>syahrisyahri@unesa.ac.id</i> | Pass: <i>admin123</i><br>
                 • Pengguna Default: <i>user</i> | Pass: <i>user123</i> (Atau silahkan registrasi akun baru)
             </div>
         </div>
 
-        <!-- FORM REGISTRASI PENGGUNA -->
-        <div id="form-register-box" class="hidden">
+        <!-- FORM REGISTRASI -->
+        <div id="form-register-container" class="hidden">
             <h2>Pendaftaran Akun Pengguna Baru</h2>
-            <form onsubmit="event.preventDefault(); prosesRegistrasi();">
+            <form id="form-register" onsubmit="event.preventDefault(); prosesRegistrasi();">
                 <div class="form-group">
                     <label>Nama Lengkap</label>
                     <input type="text" id="reg-nama" placeholder="Contoh: Ahmad Subagyo" required>
                 </div>
                 <div class="form-group">
                     <label>NIM / NIP / NIK</label>
-                    <input type="text" id="reg-id" placeholder="Masukkan Nomor Induk" required>
+                    <input type="text" id="reg-nim" placeholder="Masukkan Nomor Induk" required>
                 </div>
                 <div class="form-group">
                     <label>No. WhatsApp Active</label>
@@ -106,14 +113,14 @@
         </div>
     </div>
 
-    <!-- 2. DASHBOARD SENSITIF AKSEBILITAS (HANYA MUNCUL SETELAH LOGIN) -->
+    <!-- 2. DASHBOARD UTAMA -->
     <div id="section-dashboard" class="hidden">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; background: #eef2f7; padding: 10px 15px; border-radius: 6px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
             <div>Selamat datang, <strong id="user-display"></strong> (<span id="role-display"></span>)</div>
             <button onclick="logout()" class="btn-danger btn-sm" style="padding: 8px 15px;">Logout</button>
         </div>
 
-        <!-- FORM PINJAM (Khusus User Biasa Yang Sudah Login) -->
+        <!-- FORM PINJAM (Khusus User Biasa) -->
         <div id="section-form-pinjam" class="card hidden">
             <h3>Form Pengajuan Peminjaman Ruangan</h3>
             <form id="form-pinjam" onsubmit="event.preventDefault(); ajukanPinjaman();">
@@ -149,17 +156,38 @@
             <h3>Tambah Ruangan Perkuliahan Baru (Admin)</h3>
             <form onsubmit="event.preventDefault(); tambahRuanganBaru();">
                 <div class="form-row">
-                    <div class="form-group"><label>Kode Ruang</label><input type="text" id="add-kode" placeholder="Misal: F3.02.07" required></div>
-                    <div class="form-group"><label>Lantai</label><input type="number" id="add-lantai" value="1" required></div>
-                    <div class="form-group"><label>Jumlah Kursi</label><input type="number" id="add-kursi" value="40" required></div>
+                    <div class="form-group">
+                        <label>Kode Ruang</label>
+                        <input type="text" id="add-kode" placeholder="Misal: F3.02.07" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Lantai</label>
+                        <input type="number" id="add-lantai" value="1" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Jumlah Kursi</label>
+                        <input type="number" id="add-kursi" value="40" required>
+                    </div>
                 </div>
                 <div class="form-row">
-                    <div class="form-group"><label>Smart TV</label><input type="number" id="add-tv" value="1" required></div>
-                    <div class="form-group"><label>AC</label><input type="number" id="add-ac" value="2" required></div>
-                    <div class="form-group"><label>Stop Kontak</label><input type="number" id="add-sk" value="5" required></div>
+                    <div class="form-group">
+                        <label>Smart TV</label>
+                        <input type="number" id="add-tv" value="1" required>
+                    </div>
+                    <div class="form-group">
+                        <label>AC</label>
+                        <input type="number" id="add-ac" value="2" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Stop Kontak</label>
+                        <input type="number" id="add-sk" value="5" required>
+                    </div>
                 </div>
                 <div class="form-row">
-                    <div class="form-group"><label>Papan Tulis</label><input type="number" id="add-pt" value="1" required></div>
+                    <div class="form-group">
+                        <label>Papan Tulis</label>
+                        <input type="number" id="add-pt" value="1" required>
+                    </div>
                     <div class="form-group">
                         <label>Peruntukan</label>
                         <select id="add-peruntukan">
@@ -216,7 +244,7 @@
 
         <!-- INFO ADMIN/PETUGAS -->
         <div class="contact-info">
-            <strong>Petugas Pengelola / Admin:</strong> Syahri (syahrisyahri@unesa.ac.id) | <strong>WA:</strong> 081331382680[cite: 1]
+            <strong>Petugas Pengelola / Admin:</strong> Syahri (syahrisyahri@unesa.ac.id) | <strong>WA:</strong> 081331382680
         </div>
     </div>
 </div>
@@ -227,7 +255,10 @@
         <h3>Edit Data Ruangan</h3>
         <form onsubmit="event.preventDefault(); simpanEditRuangan();">
             <input type="hidden" id="edit-ruang-index">
-            <div class="form-group"><label>Kode Ruang</label><input type="text" id="edit-kode" required></div>
+            <div class="form-group">
+                <label>Kode Ruang</label>
+                <input type="text" id="edit-kode" required>
+            </div>
             <div class="form-row">
                 <div class="form-group"><label>Lantai</label><input type="number" id="edit-lantai" required></div>
                 <div class="form-group"><label>Kursi</label><input type="number" id="edit-kursi" required></div>
@@ -260,9 +291,18 @@
         <h3>Edit Data Peminjaman</h3>
         <form onsubmit="event.preventDefault(); simpanEditPinjaman();">
             <input type="hidden" id="edit-pinjam-id">
-            <div class="form-group"><label>Detail Pemohon</label><input type="text" id="edit-pemohon" required></div>
-            <div class="form-group"><label>Pilih Ruangan</label><select id="edit-pinjam-ruang" required></select></div>
-            <div class="form-group"><label>Tanggal Peminjaman</label><input type="date" id="edit-pinjam-tanggal" required></div>
+            <div class="form-group">
+                <label>Nama Pemohon</label>
+                <input type="text" id="edit-pemohon" required>
+            </div>
+            <div class="form-group">
+                <label>Pilih Ruangan</label>
+                <select id="edit-pinjam-ruang" required></select>
+            </div>
+            <div class="form-group">
+                <label>Tanggal Peminjaman</label>
+                <input type="date" id="edit-pinjam-tanggal" required>
+            </div>
             <div class="form-group">
                 <label>Sesi / Jam</label>
                 <select id="edit-pinjam-sesi" required>
@@ -274,7 +314,10 @@
                     <option value="15:30 - 17:10">15:30 - 17:10</option>
                 </select>
             </div>
-            <div class="form-group"><label>Keperluan</label><input type="text" id="edit-pinjam-keperluan" required></div>
+            <div class="form-group">
+                <label>Keperluan</label>
+                <input type="text" id="edit-pinjam-keperluan" required>
+            </div>
             <button type="submit" class="btn-success">Update Peminjaman</button>
             <button type="button" onclick="tutupModal('modal-edit-pinjaman')" class="btn-danger">Batal</button>
         </form>
@@ -282,13 +325,8 @@
 </div>
 
 <script>
-    // DATA BASE USER PENGGUNA TERDRAFT SEMENTARA IN-MEMORY
-    let databaseUsers = [
-        { nama: "Mahasiswa Default", nim: "2001001", wa: "081234567890", username: "user", password: "user123", role: "pengguna" }
-    ];
-
-    // DATA INITIAL RUANG PERKULIAHAN FH UNESA 2026
-    let dataRuangan = [
+    // DATA DEFAULT MASTER RUANG
+    const initialRuangan = [
         { kode: "F4.01.06", lantai: 1, kursi: 40, tv: 1, ac: 1, sk: 6, pt: 0, peruntukan: "S2", jam: "07:00 - 17:10" },
         { kode: "F4.01.05", lantai: 1, kursi: 30, tv: 1, ac: 2, sk: 6, pt: 0, peruntukan: "S2", jam: "07:00 - 17:10" },
         { kode: "F4.01.02", lantai: 1, kursi: 19, tv: 1, ac: 1, sk: 3, pt: 0, peruntukan: "S2", jam: "07:00 - 17:10" },
@@ -310,66 +348,85 @@
         { kode: "F1.02.01", lantai: 2, kursi: 84, tv: 1, ac: 2, sk: 5, pt: 1, peruntukan: "S1", jam: "07:00 - 17:10" }
     ];
 
+    // INISIALISASI PENGGUNAAN LOCALSTORAGE (STORAGE PERMANEN BROWSER)
+    let dataRuangan = JSON.parse(localStorage.getItem('unesa_ruangan')) || initialRuangan;
+    let listUsers = JSON.parse(localStorage.getItem('unesa_users')) || [];
+    let listPinjaman = JSON.parse(localStorage.getItem('unesa_pinjaman')) || [];
     let currentUser = null;
-    let listPinjaman = [];
 
     window.onload = function() {
+        simpanDataStorage();
         renderTabelRuangan();
         populateSelectRuangan();
     };
 
+    function simpanDataStorage() {
+        localStorage.setItem('unesa_ruangan', JSON.stringify(dataRuangan));
+        localStorage.setItem('unesa_users', JSON.stringify(listUsers));
+        localStorage.setItem('unesa_pinjaman', JSON.stringify(listPinjaman));
+    }
+
+    /* --- AUTHENTICATION & TAB --- */
     function switchAuthTab(tab) {
         if(tab === 'login') {
-            document.getElementById('form-login-box').classList.remove('hidden');
-            document.getElementById('form-register-box').classList.add('hidden');
-            document.getElementById('tab-login-btn').classList.add('active');
-            document.getElementById('tab-register-btn').classList.remove('active');
+            document.getElementById("btn-tab-login").classList.add("active");
+            document.getElementById("btn-tab-register").classList.remove("active");
+            document.getElementById("form-login-container").classList.remove("hidden");
+            document.getElementById("form-register-container").classList.add("hidden");
         } else {
-            document.getElementById('form-login-box').classList.add('hidden');
-            document.getElementById('form-register-box').classList.remove('hidden');
-            document.getElementById('tab-login-btn').classList.remove('active');
-            document.getElementById('tab-register-btn').classList.add('active');
+            document.getElementById("btn-tab-register").classList.add("active");
+            document.getElementById("btn-tab-login").classList.remove("active");
+            document.getElementById("form-register-container").classList.remove("hidden");
+            document.getElementById("form-login-container").classList.add("hidden");
         }
     }
 
     function prosesRegistrasi() {
         const nama = document.getElementById("reg-nama").value;
-        const idNum = document.getElementById("reg-id").value;
+        const nim = document.getElementById("reg-nim").value;
         const wa = document.getElementById("reg-wa").value;
-        const user = document.getElementById("reg-username").value;
+        const username = document.getElementById("reg-username").value;
         const pass = document.getElementById("reg-password").value;
 
-        const adaUser = databaseUsers.find(u => u.username === user);
+        const adaUser = listUsers.find(u => u.username === username);
         if(adaUser) {
-            alert("Username tersebut sudah digunakan! Silakan buat username lain.");
+            alert("Username/Email sudah terdaftar. Gunakan username lain!");
             return;
         }
 
-        databaseUsers.push({ nama, nim: idNum, wa, username: user, password: pass, role: "pengguna" });
-        alert("Pendaftaran Berhasil! Silakan Login menggunakan username dan password Anda.");
+        listUsers.push({ nama, nim, wa, username, pass, role: "pengguna" });
+        simpanDataStorage();
+        alert("Pendaftaran Berhasil! Silakan Login menggunakan akun baru Anda.");
+        document.getElementById("form-register").reset();
         switchAuthTab('login');
-        document.getElementById("login-username").value = user;
     }
 
     function prosesLogin() {
         const user = document.getElementById("login-username").value;
         const pass = document.getElementById("login-password").value;
 
+        // Cek Admin Default
         if (user === "syahrisyahri@unesa.ac.id" && pass === "admin123") {
-            currentUser = { nama: "Syahri (Admin)", username: user, role: "admin", detail: "syahrisyahri@unesa.ac.id / WA: 081331382680" };
-        } else {
-            const match = databaseUsers.find(u => u.username === user && u.password === pass);
-            if(match) {
-                currentUser = { nama: match.nama, username: match.username, role: match.role, detail: `${match.nama} (${match.nim}) - WA: ${match.wa}` };
+            currentUser = { username: user, role: "admin", nama: "Admin Syahri" };
+        } 
+        // Cek Pengguna Default
+        else if (user === "user" && pass === "user123") {
+            currentUser = { username: user, role: "pengguna", nama: "Pengguna Umum" };
+        } 
+        // Cek Pengguna Hasil Registrasi
+        else {
+            const userTerdaftar = listUsers.find(u => u.username === user && u.pass === pass);
+            if (userTerdaftar) {
+                currentUser = { username: userTerdaftar.username, role: "pengguna", nama: userTerdaftar.nama };
             } else {
-                alert("Username atau Password salah/belum terdaftar!");
+                alert("Username atau Password salah!");
                 return;
             }
         }
 
         document.getElementById("section-auth").classList.add("hidden");
         document.getElementById("section-dashboard").classList.remove("hidden");
-        document.getElementById("user-display").innerText = currentUser.nama;
+        document.getElementById("user-display").innerText = currentUser.nama || currentUser.username;
         document.getElementById("role-display").innerText = currentUser.role.toUpperCase();
 
         if (currentUser.role === "admin") {
@@ -392,43 +449,10 @@
         currentUser = null;
         document.getElementById("section-auth").classList.remove("hidden");
         document.getElementById("section-dashboard").classList.add("hidden");
+        document.getElementById("form-login").reset();
     }
 
-    /* --- FUNGSI PEMINJAMAN RUANGAN (STRICT ANTI-BENTROK) --- */
-    function ajukanPinjaman() {
-        const ruang = document.getElementById("pinjam-ruang").value;
-        const tgl = document.getElementById("pinjam-tanggal").value;
-        const sesi = document.getElementById("pinjam-sesi").value;
-        const keperluan = document.getElementById("pinjam-keperluan").value;
-
-        // PENGECEKAN KETAT ANTI-BENTROK (MENCEGAH PENGAJUAN GANDA MESHUP/PENDING)
-        const bentrok = listPinjaman.find(p => 
-            p.ruang === ruang && 
-            p.tanggal === tgl && 
-            p.sesi === sesi && 
-            (p.status === "Diproses" || p.status === "Disetujui") // Diproses/Pending JUGA DIKUNCI
-        );
-
-        if (bentrok) {
-            alert(`JADWAL BENTROK!\nRuang ${ruang} pada tanggal ${tgl} sesi ${sesi} SUDAH DIISI ATAU SEDANG DIPROSES oleh pengguna lain (${bentrok.pemohon}).\nSilakan pilih sesi jam atau ruangan lainnya.`);
-            return;
-        }
-
-        listPinjaman.push({
-            id: Date.now(),
-            pemohon: currentUser.detail,
-            ruang: ruang,
-            tanggal: tgl,
-            sesi: sesi,
-            keperluan: keperluan,
-            status: "Diproses"
-        });
-
-        alert("Pengajuan peminjaman berhasil dikirim! Pengajuan Anda sudah terdaftar dan jadwal telah dikunci.");
-        document.getElementById("form-pinjam").reset();
-        renderTabelPinjaman();
-    }
-
+    /* --- FUNGSI TAMPILKAN TABEL RUANG & DROPDOWN --- */
     function renderTabelRuangan() {
         const tbody = document.getElementById("tabel-ruangan");
         tbody.innerHTML = "";
@@ -463,6 +487,7 @@
     function populateSelectRuangan() {
         const select = document.getElementById("pinjam-ruang");
         const selectEdit = document.getElementById("edit-pinjam-ruang");
+        
         let htmlOptions = "";
         dataRuangan.forEach(r => {
             htmlOptions += `<option value="${r.kode}">${r.kode} (Lantai ${r.lantai} - Max ${r.kursi} Kursi)</option>`;
@@ -472,6 +497,7 @@
         if (selectEdit) selectEdit.innerHTML = htmlOptions;
     }
 
+    /* --- FUNGSI KELOLA RUANGAN (ADMIN) --- */
     function tambahRuanganBaru() {
         const k = document.getElementById("add-kode").value;
         const l = parseInt(document.getElementById("add-lantai").value);
@@ -483,6 +509,7 @@
         const p = document.getElementById("add-peruntukan").value;
 
         dataRuangan.push({ kode: k, lantai: l, kursi: kr, tv: tv, ac: ac, sk: sk, pt: pt, peruntukan: p, jam: "07:00 - 17:10" });
+        simpanDataStorage();
         alert("Ruangan berhasil ditambahkan!");
         renderTabelRuangan();
         populateSelectRuangan();
@@ -499,6 +526,7 @@
         document.getElementById("edit-sk").value = r.sk;
         document.getElementById("edit-pt").value = r.pt;
         document.getElementById("edit-peruntukan").value = r.peruntukan;
+        
         document.getElementById("modal-edit-ruang").style.display = "block";
     }
 
@@ -515,6 +543,7 @@
             peruntukan: document.getElementById("edit-peruntukan").value,
             jam: "07:00 - 17:10"
         };
+        simpanDataStorage();
         alert("Data ruangan berhasil diperbarui!");
         tutupModal('modal-edit-ruang');
         renderTabelRuangan();
@@ -524,9 +553,40 @@
     function hapusRuangan(index) {
         if (confirm(`Yakin ingin menghapus ruangan ${dataRuangan[index].kode}?`)) {
             dataRuangan.splice(index, 1);
+            simpanDataStorage();
             renderTabelRuangan();
             populateSelectRuangan();
         }
+    }
+
+    /* --- FUNGSI PEMINJAMAN RUANGAN & ANTI-BENTROK --- */
+    function ajukanPinjaman() {
+        const ruang = document.getElementById("pinjam-ruang").value;
+        const tgl = document.getElementById("pinjam-tanggal").value;
+        const sesi = document.getElementById("pinjam-sesi").value;
+        const keperluan = document.getElementById("pinjam-keperluan").value;
+
+        // CEK SISTEM ANTI BENTROK JADWAL
+        const bentrok = listPinjaman.find(p => p.ruang === ruang && p.tanggal === tgl && p.sesi === sesi && p.status !== "Ditolak");
+        if (bentrok) {
+            alert(`JADWAL BENTROK!\nRuang ${ruang} pada tanggal ${tgl} sesi ${sesi} sudah diajukan/disetujui oleh ${bentrok.pemohon}. Silakan pilih jam atau ruangan lain.`);
+            return;
+        }
+
+        listPinjaman.push({
+            id: Date.now(),
+            pemohon: currentUser.nama + " (" + currentUser.username + ")",
+            ruang: ruang,
+            tanggal: tgl,
+            sesi: sesi,
+            keperluan: keperluan,
+            status: "Diproses"
+        });
+
+        simpanDataStorage();
+        alert("Pengajuan peminjaman berhasil dikirim!");
+        document.getElementById("form-pinjam").reset();
+        renderTabelPinjaman();
     }
 
     function renderTabelPinjaman() {
@@ -557,7 +617,7 @@
 
             tbody.innerHTML += `
                 <tr>
-                    <td><strong>${p.pemohon}</strong></td>
+                    <td>${p.pemohon}</td>
                     <td><strong>${p.ruang}</strong></td>
                     <td>${p.tanggal}</td>
                     <td>${p.sesi}</td>
@@ -573,6 +633,7 @@
         const index = listPinjaman.findIndex(p => p.id === id);
         if (index !== -1) {
             listPinjaman[index].status = statusBaru;
+            simpanDataStorage();
             renderTabelPinjaman();
         }
     }
@@ -601,6 +662,7 @@
             listPinjaman[index].sesi = document.getElementById("edit-pinjam-sesi").value;
             listPinjaman[index].keperluan = document.getElementById("edit-pinjam-keperluan").value;
 
+            simpanDataStorage();
             alert("Peminjaman berhasil diperbarui!");
             tutupModal('modal-edit-pinjaman');
             renderTabelPinjaman();
@@ -610,6 +672,7 @@
     function hapusPinjaman(id) {
         if (confirm("Apakah Anda yakin ingin menghapus transaksi peminjaman ini?")) {
             listPinjaman = listPinjaman.filter(p => p.id !== id);
+            simpanDataStorage();
             renderTabelPinjaman();
         }
     }
